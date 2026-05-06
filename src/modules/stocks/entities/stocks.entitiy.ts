@@ -24,6 +24,9 @@ export class Stock implements StockData {
     @JoinColumn({ name: 'exchangeRateId' })
     exchangeRate: ExchangeRate;
 
+    @Column() 
+    exchangeRateName : string ; 
+
     @Column('decimal', { precision: 12, scale: 2  , default : 0 })
     total_received: number ;
 
