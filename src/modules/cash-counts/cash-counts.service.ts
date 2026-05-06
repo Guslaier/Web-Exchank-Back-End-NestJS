@@ -135,4 +135,36 @@ export class CashCountsService {
       foreign: foreignCashCounts,
     };
   }
+
+  async getCashCountByShiftId(shiftId : string) {
+    const cashCountData = await this.cashCountRepository.find({
+      relations : {
+        transaction : {
+          shift : true
+        }
+      }
+      ,
+      where : {
+        transaction : {
+          type : 'CLOSE_SHIFT_CASH_COUNT' , 
+          shift : {
+            id : shiftId , 
+          }
+        }
+      }
+      ,
+      select : {
+        transaction : {
+          id : true ,
+          shift : {
+            id : true 
+          }
+        } ,
+        id : true ,
+        currencyId : true , 
+        denomination : true , 
+        amount : true 
+      }
+    })
+  }
 }
