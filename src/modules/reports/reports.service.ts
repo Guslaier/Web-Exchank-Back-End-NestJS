@@ -1,27 +1,37 @@
 import { Injectable } from "@nestjs/common";
-import { PutShiftBody } from './dto/report.dto' ; 
+import {} from './dto/report.dto' ; 
 import { ShiftsService } from './../shifts/shifts.service'
+import { StocksService } from "./../stocks/stocks.service"; 
+import { CashCountsService } from "./../cash-counts/cash-counts.service"; 
 
 @Injectable() 
 export class ReportsService {
     constructor(
-        private readonly shiftService : ShiftsService ; 
+        private readonly shiftService : ShiftsService ,
+        private readonly stockService : StocksService ,
+        private readonly cashCountService : CashCountsService ,  
     ) 
     {}
     //helper
     //create
     //read
-    //update
-    async updateAuditShift(user : any , id : string , paras : PutShiftBody) {
-        // 1.ตรวจสอบกะ
-            // 1.1 กะไม่มีอยู่จริง ปฏิเสธ
-            // 1.2 กะไม่มีสถานะเป็น 'CLOSE' ปฏิเสธ
-        const shiftData = await this.shiftService.getShiftWithCloseStatusOrFail(user , id , 'AUDIT_SHIFT') ;
+    async getPreviousShiftData(user : any , boothId : string) {
+        const data = []  ; 
+
+        const shiftData = await this.shiftService.getNonOpenPreviousShiftByBoothId(boothId) ; 
+        if(shiftData) {
+            const shiftId = shiftData?.id  ;
+            const stockData = this.stockService.getStockByShiftId(shiftId)  ;
+            const cashCountData = this.cashCountService.getCashCountByShiftId(shiftId) ; 
+            await Promise.all([stockData , cashCountData]) ; 
+
+            data.push(shiftId) ;
+            data.push(stockData) ; 
+        }
         
-        // 2.บันทึกธุรกรรม 
-        
-        
+        return data ; 
     }
+    //update
     //delete
 
 }
