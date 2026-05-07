@@ -27,18 +27,22 @@ export class StocksService {
      
     // create
 
-    async create(shiftId: string | undefined , exchangeRateId: string | undefined , manager : EntityManager) {
+    async create(shiftId: string | undefined , exchangeRateId: string  | undefined , manager : EntityManager) {
         const stockRepo = manager.getRepository(Stock) ;
+
+        const THBExchangeRateId = await this.getTHBIdCache() ; 
+        const isTHB = (exchangeRateId == THBExchangeRateId) ; 
+        const exchangeRateName = isTHB ? "THB"  :   (await this.exchangeRatesService.findById(exchangeRateId as string)).name ; 
+        if (isTHB) {
+            await this.createTHBSummary(shiftId) ; 
+        }
+
+        
         const stockCreate = stockRepo.create({
             shiftId,
             exchangeRateId,
+            exchangeRateName : exchangeRateName ,
         });
-
-        const THBExchangeRateId = await this.getTHBIdCache() ; 
-        if (exchangeRateId == THBExchangeRateId) {
-            await this.createTHBSummary(shiftId) ; 
-        }
-        
 
         return await manager.save(stockCreate);
     }
