@@ -5,6 +5,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import {
   CreateExchangeTransactionDto,
@@ -79,12 +80,12 @@ export class ExchangeTransactionsService {
       currentUser.id,
     );
     if (!activeShift) {
-      await this.log(
-        currentUser,
-        'CREATE_EXCHANGE_TRANSACTION_FAILED',
-        'Failed to create exchange transaction due to no active shift found for the user',
-      );
+      await this.log(currentUser,'CREATE_EXCHANGE_TRANSACTION_FAILED','Failed to create exchange transaction due to no active shift found for the user',);
       throw new NotFoundException('No active shift found for the user');
+    }
+    else if(activeShift.status !== 'OPEN') {
+      await this.log(currentUser,'CREATE_EXCHANGE_TRANSACTION_FAILED', `Failed to create exchange transaction due to no shift for this user is not in 'OPEN' status.`,);
+
     }
 
     const exchangeRateId = await this.exchangeRateService.findById(
@@ -270,15 +271,15 @@ export class ExchangeTransactionsService {
 
   // read
 
-  async getTransactionsFromShift(
-    currentUser: any,
-    query: GetExchangeTransactionsFromShiftsDto | undefined,
-  ) {
+  async getTransactionsFromShift(currentUser: any,query: GetExchangeTransactionsFromShiftsDto | undefined,) {
     let isEmployee = currentUser.role === 'EMPLOYEE' ? true : false;
+    
+    const shiftData = isEmployee ? await this.shiftsService.getLastShiftByUserId(currentUser.id) : null ;  
+    if(shiftData && shiftData.status !== 'OPEN') {
+      throw new ConflictException(`Shift is not in 'OPEN' status.`) ;    
+    }
 
-    const shiftId = isEmployee
-      ? (await this.shiftsService.getLastShiftByUserId(currentUser.id))?.id
-      : query?.id;
+    const shiftId = shiftData ? shiftData.id : query?.id ;
 
     if (!shiftId) {
       throw new BadRequestException('No active shift found');
@@ -360,10 +361,12 @@ export class ExchangeTransactionsService {
         currentUser.id,
       );
       if (!activeShift) {
-        throw new BadRequestException(
-          'Active shift not found for the employee.',
-        );
+        throw new BadRequestException('Active shift not found for the employee.');
       }
+      else if(activeShift.status !== 'OPEN') {
+        throw new ConflictException('Shift is not open for employee.') ; 
+      }
+
       const exchangeTransaction =
         await this.exchangeTransactionRepository.findOne({
           relations: {
@@ -581,12 +584,11 @@ export class ExchangeTransactionsService {
       currentUser.id,
     );
     if (!activeShift) {
-      await this.log(
-        currentUser,
-        'SET_EXCHANGE_TRANSACTION_PENDING_FAILED',
-        `Failed to set exchange transaction with ID: ${param.id} Cause Active shift not found for the employee.`,
-      );
+      await this.log(currentUser,'SET_EXCHANGE_TRANSACTION_PENDING_FAILED',`Failed to set exchange transaction with ID: ${param.id} Cause Active shift not found for the employee.`);
       throw new NotFoundException('Active shift not found for the employee.');
+    }
+    else if(activeShift.status !== 'OPEN') {
+      await this.log(currentUser,'SET_EXCHANGE_TRANSACTION_PENDING_FAILED',`Failed to set exchange transaction with ID: ${param.id} Cause Shift is not in 'OPEN' status.`);
     }
 
     const exchangeTransaction =
