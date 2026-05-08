@@ -1,6 +1,7 @@
 import { TimestampTransformer } from '../../../common/helper/timestamp';
 import { UserRole } from 'index';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Shift } from '../../shifts/entities/shift.entity';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
 
 
 
@@ -35,4 +36,7 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt?: Date;
+
+  @OneToMany(() => Shift, (shift: Shift) => shift.user)
+  shifts: Shift[];
 }

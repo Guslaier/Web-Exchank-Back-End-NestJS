@@ -11,6 +11,7 @@ export class Shift {
   @Column({type : 'uuid'})
   userId : string;
 
+
   @ManyToOne(() => User , (User) => User.id)
   @JoinColumn({name : "userId"})
   user: User;
