@@ -411,7 +411,14 @@ export class ShiftsService {
 
   async updateAuditShift(user : any , id : string , paras : ShiftAuditBody) {
     const shiftData = await this.getShiftWithCloseStatusOrFail(user , id , 'AUDIT_SHIFT') ;
-          
+    const pendingTransId = await this.transactionService.getPendingTransId(id) ; 
+    
+
+    if(pendingTransId && pendingTransId.length != 0) {
+      await this.log(user, 'AUDIT_SHIFT_FAILED' , `Can't audit shift id : ${id} cause this shift still have ${pendingTransId.length} pending exchange transaction.`) ; 
+      throw new ConflictException(`Can't audit this shift id: ${id} cause this shift still have ${pendingTransId.length} pending exchange transaction.`) ;     
+    }
+  
     await this.dataSource.transaction(async(manager) =>{
       const transactionData = await this.transactionService.create(manager, {type : 'CLOSE_SHIFT_CASH_COUNT' , shiftId : id}) ;
             
