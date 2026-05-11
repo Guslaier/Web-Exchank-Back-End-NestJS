@@ -28,7 +28,7 @@ import { CreateTransactionDto } from './../../modules/transactions/dto/transacti
 import { UpdateStockByExchangeTransactionForCancel} from './../../modules/stocks/dto/stocks.dto'
 import { InputValidator } from './helper/input-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, EntityManager, IsNull } from 'typeorm';
+import { Repository, DataSource, EntityManager, IsNull, Not } from 'typeorm';
 import { ExchangeTransaction } from './entities/exchange-transaction.entity';
 import { handleError } from '../../common/error/error';
 
@@ -348,6 +348,30 @@ export class ExchangeTransactionsService {
     }
 
     return exchangeTransactions;
+  }
+
+  async getForeingAmountExchangeRateAndStatusFromShiftId(id : string) {
+    const exchangeTransactionData = await this.exchangeTransactionRepository.find({
+        relations: {
+          transaction: {
+            shift: true 
+          }
+        },
+        where: {
+          transaction: {
+            shiftId: id,
+          },
+        },
+        select: {
+          id: true,
+          type: true,
+          foreignCurrencyAmount: true,
+          exchangeRate: true,
+          status : true , 
+        },
+      });
+
+    return exchangeTransactionData ; 
   }
 
   async getTransactionDetail(
