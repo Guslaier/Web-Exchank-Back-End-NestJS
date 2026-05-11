@@ -62,6 +62,8 @@ export class TransferTransactionsService {
     private readonly exchangeRatesService: ExchangeRatesService,
     @Inject(ShiftsService)
     private readonly shiftService : ShiftsService ,
+    @InjectRepository(TransferTransaction)
+    private readonly tranferTransactionRepo : Repository<TransferTransaction> ,
   ) {}
 
   /**
@@ -1265,5 +1267,22 @@ export class TransferTransactionsService {
         `Failed to get transfer transactions for date range ${startDate} - ${endDate}`,
       );
     }
+  }
+
+  async getAmountTypeStatusByShiftId(id :  string) {
+    const tranferTransactionData = await this.tranferTransactionRepo.find({
+      where : {
+        shiftId : id , 
+        exchangeRateName : 'THB' , 
+      } , 
+      select : {
+        id : true , 
+        amount : true , 
+        type : true , 
+        status : true , 
+      } 
+    }) ;
+
+    return tranferTransactionData ; 
   }
 }
