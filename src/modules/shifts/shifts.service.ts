@@ -32,7 +32,6 @@ import {
 } from './dto/shift.dto';
 import { isUUID } from 'class-validator';
 import { handleError } from '../../common/error/error';
-import { re } from 'mathjs';
 
 @Injectable()
 export class ShiftsService {
@@ -194,6 +193,36 @@ export class ShiftsService {
       throw new InternalServerErrorException('Internal Server Error');
     }
   }
+
+  async getShiftsByStatus(status : string , from : Date , to : Date){
+      const shiftsData = await this.shiftRepository.find({
+        relations : {
+            user : true ,
+            booth : true ,  
+        },
+        where : { 
+          status : status ,
+          startTime : Between(from , to) ,  
+        } ,
+        select : {
+          id : true , 
+          startTime : true , 
+          endTime : true , 
+          balance_check : true , 
+          cash_advance : true , 
+          booth : {
+            id : true ,
+            name : true , 
+          },
+          user : {
+            id : true ,
+            username : true ,
+          }
+        }
+      })
+
+      return shiftsData ;
+  } ;
 
   async getActiveShifts(query: QueryDateDto) {
     if (!query.startDate || !query.endDate) {
