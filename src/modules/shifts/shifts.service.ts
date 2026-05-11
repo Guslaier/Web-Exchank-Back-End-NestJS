@@ -21,6 +21,7 @@ import {
 import { SystemLogsService } from '../../modules/system-logs/system-logs.service';
 import { CashCountsService } from './../../modules/cash-counts/cash-counts.service';
 import { TransactionsService } from './../../modules/transactions/transactions.service' ; 
+import { SseService } from './../../modules/sse/sse.service' ; 
 import Redis from 'ioredis';
 import {
   QueryDateDto,
@@ -42,6 +43,7 @@ export class ShiftsService {
     private readonly systemLogsService: SystemLogsService,
     private readonly cashCountServicee : CashCountsService , 
     private readonly transactionService : TransactionsService , 
+    private readonly sseService : SseService ,
     @Inject('REDIS_CLIENT')
     private readonly redisClient: Redis,
     private readonly dataSource: DataSource,
@@ -83,7 +85,8 @@ export class ShiftsService {
     try {
       const savedShift = await shiftRepo.save(row);
       const logQuery  = await this.log(currentUser,'OPEN_SHIFT_SUCCESS',`Shift id : ${savedShift.id} was opened by User id : ${currentUser.id}`,manager,);
-       return {message : 'Open shift success.'} ; 
+      this.sseService.triggerRefreshSignal() ;  
+      return {message : 'Open shift success.'} ; 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       await this.log(currentUser,'OPEN_SHIFT_FAILED',`internal server error: ${errorMessage}`,manager,);
@@ -365,6 +368,7 @@ export class ShiftsService {
     } 
 
     await this.log(currentUser , 'OPEN_SHIFT_SUCCESS' , `Update shift id : ${id} from ${previousStatus} to OPEN`,manager) ;
+    this.sseService.triggerRefreshSignal() ; 
     return {message : 'Open shift success.'} ; 
   }
 
@@ -399,7 +403,7 @@ export class ShiftsService {
           await this.log(currentUser , 'CLOSE_SHIFT_FAILED' , `Can't Update shift id : ${shiftData.id}.`,manager) ; 
           throw new NotFoundException(`Can't shift to close.`) ; 
         }
-
+        this.sseService.triggerRefreshSignal() ; 
         await this.log(currentUser , 'CLOSE_SHIFT_SUCCESS' , `Shift id : ${shiftData.id} to update status from ${shiftData.status} to CLOSE.`,manager) ;
         return {message : 'Close shift success.'} ; 
       }
