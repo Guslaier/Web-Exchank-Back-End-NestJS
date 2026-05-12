@@ -74,7 +74,11 @@ docker-compose down
 
 ```bash
 docker-compose down -v
+
 ```
+### openssl
+```bash
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.key -out server.cert -config ./config.cnf -extensions v3_req
 
 
 ## รันแบบไม่ใช้ Docker

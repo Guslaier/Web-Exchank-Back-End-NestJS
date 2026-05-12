@@ -3,20 +3,24 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import {AuthService} from '../../modules/auth/auth.service';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Request } from 'express';
 import { UserData } from 'index';
 
 @Injectable()
 // JwtStrategy ใช้สำหรับตรวจสอบและยืนยันตัวตนของผู้ใช้โดยใช้ JSON Web Token (JWT) 
-// ซึ่งจะถูกส่งมาพร้อมกับคำขอ (request) ในรูปแบบของ Bearer token 
-// ใน header ของ HTTP request
+// ซึ่งจะถูกดึงมาจาก HttpOnly Cookie ชื่อ access_token
 
 
 // สร้าง JwtStrategy โดยสืบทอดจาก PassportStrategy และระบุว่าเราจะใช้กลยุทธ์ 'jwt'
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(config: ConfigService, private authService: AuthService) {
     super({
-      // กำหนดวิธีการดึง JWT จาก header ของ HTTP request โดยใช้ ExtractJwt.fromAuthHeaderAsBearerToken()
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // ดึง JWT จาก HttpOnly Cookie แทนที่จะเป็น Authorization Header
+      jwtFromRequest: (req: Request): string | null => {
+        return req?.cookies?.access_token ?? null;
+      },
+      // ต้องส่ง request object เข้ามาด้วยเพื่อให้ extractor อ่าน cookies ได้
+      passReqToCallback: false,
       // กำหนด secret key ที่ใช้ในการตรวจสอบความถูกต้องของ JWT โดยดึงค่าจาก configuration
       secretOrKey: (config.get('jwt') as any).secret,
     });

@@ -5,3 +5,7 @@ dist
 upload
 
 system-design.txt
+
+# SSL Certificates
+server.key
+server.cert
