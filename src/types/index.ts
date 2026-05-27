@@ -59,6 +59,44 @@ export interface ShiftData {
   updatedAt: Date; // updated_at
 }
 
+export class ShiftDetail {
+    shiftid : string | null = null ;
+    userid : string | null = null ; 
+    name : string  = '' ; 
+    username : string | null = null  ; 
+    location : string | null =  '' ;  
+    isActive : boolean  = true ;  
+    status : string  | null  = '' ;    
+    cashcount :  CashCountInput[] = [] ; 
+    tranfer : Tranfersum[]  = []  ;
+    exchange : ExchangeSum[]  = [] ; 
+
+    constructor(name : string , location : string | null, active : boolean  , userid : string | null , username : string | null,  ) {
+      this.name = name ; 
+      this.location = location ; 
+      this.isActive = active ; 
+      this.userid = userid ; 
+      this.username = username ;
+    }
+
+    setShiftData(id : string , status : string) {
+      this.shiftid = id ; 
+      this.status = status ; 
+    }
+
+    setCashcount(cc : CashCountInput[]) {
+      this.cashcount =  cc ;
+    }
+
+    setTrafer(tranfer : Tranfersum[]) {
+      this.tranfer = tranfer ; 
+    }
+
+    setExchange(exchange : ExchangeSum[]) {
+      this.exchange = exchange
+    }
+}
+
 //== Customer Interfaces ==//
 export interface CustomerData {
   readonly id: string; // PK จากในรูป
@@ -99,6 +137,8 @@ export interface TransferTransactionData {
   updatedAt: Date;
 }
 
+export type Tranfersum = Pick<TransferTransactionData , 'amount' | 'type' | 'status'>
+
 export interface ExchangeTransactionData {
   readonly id: string; // PK, FK
   readonly customerId: string; // customer_id
@@ -117,6 +157,16 @@ export interface ExchangeTransactionData {
   createdAt: Date;
 }
 
+
+
+export interface ExchangeSum {
+  type : string , 
+  exchangeRate: number ,
+  foreignCurrencyAmount : number , 
+  status : string ,
+
+}
+
 export interface CashCountData {
   readonly id: string; // PK
   readonly currencyId: string; // FK (เช่น 'USD', 'THB')
@@ -126,6 +176,9 @@ export interface CashCountData {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type CashCountInput = Pick<CashCountData , 'denomination' | 'amount'> 
+ 
 
 //== Currency Interfaces ==//
 export interface CurrencyIF {
@@ -150,6 +203,7 @@ export interface ExchangeRate {
   createdAt: Date;
   updatedAt: Date;
 }
+
 
 export interface ExclusiveExchangeRate {
   readonly exchangeRateId: string; // PK, FK (เชื่อมกลับไปยัง exchange_rates)
