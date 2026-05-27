@@ -16,10 +16,20 @@ import { StocksModule } from './../../modules/stocks/stocks.module';
 import { SseModule } from '../sse/sse.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ExchangeTransaction]) , ShiftsModule , ExchangeRatesModule , TransactionsModule , SystemLogsModule , CustomersModule , CashCountsModule , ExclusiveExchangeRatesModule , StocksModule, SseModule  ],
+  imports: [
+    TypeOrmModule.forFeature([ExchangeTransaction]),
+    ShiftsModule,
+    ExchangeRatesModule,
+    TransactionsModule,
+    SystemLogsModule,
+    CustomersModule,
+    CashCountsModule,
+    ExclusiveExchangeRatesModule,
+    StocksModule,
+    SseModule,
+  ],
   controllers: [ExchangeTransactionsController],
   providers: [ExchangeTransactionsService , InputValidator],
   exports: [ExchangeTransactionsService],
-  
 })
 export class ExchangeTransactionsModule {}
