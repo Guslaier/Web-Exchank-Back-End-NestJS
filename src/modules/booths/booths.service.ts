@@ -127,8 +127,8 @@ export class BoothsService {
     to.setHours(23,59,59,999) ; 
 
     const boothData = await this.boothRepository.query(
-      `select b.id as boothId , s.id as shiftId , u.id as userId , b.name  , u.username , b.location , s.status  from 
-       booths b left join (select s.id , s."boothId" , s."userId" , s.status , s."startTime" from shifts s where s."startTime" between $1 and $2) s 
+      `select b.id as boothId , s.id as shiftId , u.id as userId , b.name  , u.username , b.location , s.status , s.cash_advance , s.balance_check from 
+       booths b left join (select s.id , s."boothId" , s."userId" , s.status , s."startTime"  , s.cash_advance , s.balance_check  from shifts s where s."startTime" between $1 and $2) s 
        on b.id = s."boothId" and b."currentShiftId" = s."userId" 
        left join users u on b."currentShiftId" = u.id
        where b.id = $3 and (b."deletedAt" is null) and (b."isActive" = true)

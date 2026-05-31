@@ -369,7 +369,7 @@ export class ShiftsService {
     
     const shiftDetail = new ShiftDetail(boothData.name , boothData.location , true  ,boothData.userid , boothData.username)  ;
 
-    shiftDetail.setShiftData(boothData.shiftid , boothData.status) ;
+    shiftDetail.setShiftData(boothData.shiftid , boothData.status , boothData.cash_advance , boothData.balance_check) ;
 
     const shiftId = boothData.shiftid ; 
 

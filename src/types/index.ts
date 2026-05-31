@@ -70,8 +70,10 @@ export class ShiftDetail {
     cashcount :  CashCountInput[] = [] ; 
     tranfer : Tranfersum[]  = []  ;
     exchange : ExchangeSum[]  = [] ; 
+    balance_check : number | null = null ; 
+    cash_advance : number | null = null ; 
 
-    constructor(name : string , location : string | null, active : boolean  , userid : string | null , username : string | null,  ) {
+    constructor(name : string , location : string | null, active : boolean  , userid : string | null , username : string | null,   ) {
       this.name = name ; 
       this.location = location ; 
       this.isActive = active ; 
@@ -79,9 +81,11 @@ export class ShiftDetail {
       this.username = username ;
     }
 
-    setShiftData(id : string , status : string) {
+    setShiftData(id : string , status : string , cash_advance : number | null , balance_check : number | null) {
       this.shiftid = id ; 
       this.status = status ; 
+      this.cash_advance =cash_advance ;
+      this.balance_check = balance_check ; 
     }
 
     setCashcount(cc : CashCountInput[]) {
