@@ -7,7 +7,7 @@ import { SystemLogsModule } from '../../modules/system-logs/system-logs.module';
 import { CurrenciesModule } from '../../modules/currencies/currencies.module';
 import { Transaction } from '../transactions/entities/transaction.entity';
 import { TransferTransaction } from '../transfer-transactions/entities/transfer-transaction.entity';
-import { SseModule } from '../sse/sse.module';  
+import { SseModule } from '../sse/sse.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([CashCount, Transaction, TransferTransaction]),

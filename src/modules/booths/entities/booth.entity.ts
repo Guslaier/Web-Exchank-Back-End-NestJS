@@ -27,19 +27,27 @@ export class Booth {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ nullable: true , type: 'uuid' })
+  @Column({ nullable: true, type: 'uuid' })
   currentShiftId: string | null;
 
   @ManyToOne(() => User, (User) => User.id, { nullable: true })
   @JoinColumn({ name: 'currentShiftId' })
   currentShift: User | null;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" , transformer: TimestampTransformer })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" , transformer: TimestampTransformer })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   updatedAt: Date;
 
-  @DeleteDateColumn({transformer: TimestampTransformer})
+  @DeleteDateColumn({ transformer: TimestampTransformer })
   deletedAt?: Date;
 }

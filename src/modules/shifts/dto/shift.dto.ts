@@ -1,7 +1,19 @@
-import { IsString, IsNotEmpty, IsOptional, IsDateString , IsDate, IsNumber, IsUUID, min, Min, IsObject, ValidateNested } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDateString,
+  IsDate,
+  IsNumber,
+  IsUUID,
+  min,
+  Min,
+  IsObject,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import type  {ShiftData , BoothData} from './../../../types/index' ;  
-import {CashCountItemArrayDto } from './../../cash-counts/dto/cash-count.dto' ; 
+import type { ShiftData, BoothData } from './../../../types/index';
+import { CashCountItemArrayDto } from './../../cash-counts/dto/cash-count.dto';
 
 export class CreateShiftDto {
   @IsString()
@@ -22,79 +34,79 @@ export class CreateShiftDto {
 }
 
 export class QueryDateDto {
-  @IsDate() 
-  @Type(()=>Date)
+  @IsDate()
+  @Type(() => Date)
   @IsNotEmpty()
-  startDate: Date ; 
+  startDate: Date;
 
-  @IsDate() 
-  @Type(()=>Date)
+  @IsDate()
+  @Type(() => Date)
   @IsNotEmpty()
-  endDate: Date ; 
-
+  endDate: Date;
 }
 
-export class ShiftAuditParam implements Pick<ShiftData , 'id'> {
-    @IsUUID() 
-    @IsNotEmpty()
-    id : string ; 
+export class ShiftAuditParam implements Pick<ShiftData, 'id'> {
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
 }
 
-
-export class ShiftAuditBody implements Pick<ShiftData ,   'balanceCheck' | 'cashAdvance' > {
+export class ShiftAuditBody implements Pick<
+  ShiftData,
+  'balanceCheck' | 'cashAdvance'
+> {
   @IsNumber()
   @IsNotEmpty()
-  balanceCheck : number ; 
+  balanceCheck: number;
 
   @IsNumber()
   @IsNotEmpty()
   @Min(0)
-  cashAdvance : number ; 
+  cashAdvance: number;
 
-  @IsObject() 
+  @IsObject()
   @ValidateNested()
-  @Type(()=> CashCountItemArrayDto)
-  cashCountData  : CashCountItemArrayDto  ;
+  @Type(() => CashCountItemArrayDto)
+  cashCountData: CashCountItemArrayDto;
 }
 
 export class QueryShiftId {
   @IsString()
-  shiftId : string
+  shiftId: string;
 }
 
-export class UserIdDto  implements Pick<ShiftData , 'userId'> {
-  @IsUUID() 
-  @IsOptional() 
-  userId: string; 
-
+export class UserIdDto implements Pick<ShiftData, 'userId'> {
+  @IsUUID()
+  @IsOptional()
+  userId: string;
 }
 
-export class BoothIdDto implements Pick<ShiftData , 'boothId'>   {
-  @IsUUID() 
-  @IsNotEmpty()
-  boothId: string; 
-}
-
-export class ShiftIdDto implements Pick<ShiftData , 'id'>   {
-  @IsUUID() 
-  @IsOptional() 
-  id: string; 
-}
-
-export class GetShiftBoothQuery implements Pick<BoothData , 'id' > {
+export class BoothIdDto implements Pick<ShiftData, 'boothId'> {
   @IsUUID()
   @IsNotEmpty()
-  id : string ; 
+  boothId: string;
 }
 
-export class GetShiftPreviousCashcount implements Pick<BoothData , 'id'> {
+export class ShiftIdDto implements Pick<ShiftData, 'id'> {
   @IsUUID()
-  @IsNotEmpty() 
-  id : string ; 
+  @IsOptional()
+  id: string;
 }
 
-export class GetShiftCurrrentDetails implements Pick<BoothData , 'id' > {
-    @IsUUID()
-  @IsNotEmpty() 
-  id : string ; 
+export class GetShiftBoothQuery implements Pick<BoothData, 'id'> {
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
+}
+
+export class GetShiftPreviousCashcount implements Pick<BoothData, 'id'> {
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
+}
+
+export class GetShiftCurrrentDetails implements Pick<BoothData, 'id'> {
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
 }

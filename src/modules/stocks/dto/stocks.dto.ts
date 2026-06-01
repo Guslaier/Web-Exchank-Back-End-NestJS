@@ -1,92 +1,98 @@
-import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
-import { ShiftData } from './../../../types/index' ;
+import {
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
+import { ShiftData } from './../../../types/index';
 
-export class GetStockShiftQuery implements Pick<ShiftData , 'id'> {
-    @IsUUID()
-    @IsOptional()
-    id : string ; 
+export class GetStockShiftQuery implements Pick<ShiftData, 'id'> {
+  @IsUUID()
+  @IsOptional()
+  id: string;
 }
 
 export class UpdateStockByExchangeTransactionDto {
-    @IsUUID()
-    @IsNotEmpty()
-    userId: string;
+  @IsUUID()
+  @IsNotEmpty()
+  userId: string;
 
-    @IsIn(['BUY', 'SELL'])
-    @IsNotEmpty() 
-    type: string;
+  @IsIn(['BUY', 'SELL'])
+  @IsNotEmpty()
+  type: string;
 
-    @IsUUID()
-    @IsNotEmpty()
-    foreignRateId: string;
+  @IsUUID()
+  @IsNotEmpty()
+  foreignRateId: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    foreingCurrencyAmount: number;
+  @IsNumber()
+  @IsNotEmpty()
+  foreignCurrencyAmount: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    totalThaiBahtAmount: number;
-
+  @IsNumber()
+  @IsNotEmpty()
+  totalThaiBahtAmount: number;
 }
 
 export class UpdateStockByExchangeTransactionForCancel {
-    @IsUUID()
-    @IsNotEmpty()
-    id : string ; 
+  @IsUUID()
+  @IsNotEmpty()
+  id: string;
 
-    @IsIn(['BUY', 'SELL'])
-    @IsNotEmpty()
-    type : string ; 
+  @IsIn(['BUY', 'SELL'])
+  @IsNotEmpty()
+  type: string;
 
-    @IsUUID()
-    @IsNotEmpty()
-    shiftId: string;
+  @IsUUID()
+  @IsNotEmpty()
+  shiftId: string;
 
-    @IsUUID()
-    @IsNotEmpty()
-    exchangeRateId : string;
+  @IsUUID()
+  @IsNotEmpty()
+  exchangeRateId: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    foreignCurrencyAmount: number;
+  @IsNumber()
+  @IsNotEmpty()
+  foreignCurrencyAmount: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    totalthaiBahtAmount: number;
+  @IsNumber()
+  @IsNotEmpty()
+  totalthaiBahtAmount: number;
 }
 
 export class UpdateStockByTransferTransactionDto {
-    @IsUUID()
-    @IsOptional()
-    sender: string | null ;
+  @IsUUID()
+  @IsOptional()
+  sender: string | null;
 
-    @IsUUID()
-    @IsOptional()
-    receiver: string | null;
+  @IsUUID()
+  @IsOptional()
+  receiver: string | null;
 
-    @IsUUID()
-    @IsNotEmpty()
-    exchangeRateId: string;
+  @IsUUID()
+  @IsNotEmpty()
+  exchangeRateId: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    transferAmount: number;
+  @IsNumber()
+  @IsNotEmpty()
+  transferAmount: number;
 }
 export class UpdateStockByTransferTransactionForCancel {
-    @IsUUID()
-    @IsOptional()
-    sender_shift: string | null ;
+  @IsUUID()
+  @IsOptional()
+  sender_shift: string | null;
 
-    @IsUUID()
-    @IsOptional()
-    receiver_shift: string | null;
+  @IsUUID()
+  @IsOptional()
+  receiver_shift: string | null;
 
-    @IsUUID()
-    @IsNotEmpty()
-    exchangeRateId: string;
+  @IsUUID()
+  @IsNotEmpty()
+  exchangeRateId: string;
 
-    @IsNumber()
-    @IsNotEmpty()
-    transferAmount: number;
+  @IsNumber()
+  @IsNotEmpty()
+  transferAmount: number;
 }

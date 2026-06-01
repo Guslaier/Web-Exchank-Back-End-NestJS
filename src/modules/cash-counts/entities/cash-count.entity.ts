@@ -1,8 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, DeleteDateColumn, OneToOne , JoinColumn , ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  OneToOne,
+  JoinColumn,
+  ManyToOne,
+} from 'typeorm';
 import { Transaction } from '../../transactions/entities/transaction.entity';
 import { Currency } from '../../currencies/entities/currency.entity';
 import { TimestampTransformer } from '../../../common/helper/timestamp';
-
 
 @Entity('cash_counts')
 export class CashCount {
@@ -29,6 +37,10 @@ export class CashCount {
   @Column('decimal', { precision: 12, scale: 2 })
   amount: number;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" , transformer: TimestampTransformer })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   createdAt: Date;
 }

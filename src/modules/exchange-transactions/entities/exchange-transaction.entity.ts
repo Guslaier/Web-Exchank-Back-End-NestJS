@@ -43,7 +43,7 @@ export class ExchangeTransaction {
   @JoinColumn({ name: 'exchangeRateId' })
   exchangeRateFK: ExchangeRate;
 
-  // @Column() 
+  // @Column()
   // exclusiveExchangeRateId : string;
 
   // @ManyToOne(() => ExclusiveExchangeRate, (exclusiveRate) => exclusiveRate.id)
@@ -51,7 +51,7 @@ export class ExchangeTransaction {
   // exclusiveExchangeRateFK: ExclusiveExchangeRate;
 
   @Column()
-  exchangeRateName : string ;
+  exchangeRateName: string;
 
   @Column('decimal', { precision: 12, scale: 2 })
   foreignCurrencyAmount: number;
@@ -88,9 +88,13 @@ export class ExchangeTransaction {
   @Column()
   status: string;
 
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" , transformer: TimestampTransformer })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   updatedAt: Date;
 
-  @DeleteDateColumn({transformer: TimestampTransformer})
+  @DeleteDateColumn({ transformer: TimestampTransformer })
   deletedAt?: Date | null;
 }

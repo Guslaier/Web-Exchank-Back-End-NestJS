@@ -9,11 +9,14 @@ import { ExclusiveExchangeRatesModule } from '../exclusive-exchange-rates/exclus
 import { Shift } from '../shifts/entities/shift.entity';
 import { SseModule } from '../sse/sse.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([Booth, User, Shift]), SystemLogsModule, ExclusiveExchangeRatesModule, SseModule],
+  imports: [
+    TypeOrmModule.forFeature([Booth, User, Shift]),
+    SystemLogsModule,
+    ExclusiveExchangeRatesModule,
+    SseModule,
+  ],
   controllers: [BoothsController],
   providers: [BoothsService],
   exports: [BoothsService],
 })
-
-
 export class BoothsModule {}

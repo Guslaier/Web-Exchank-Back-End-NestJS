@@ -12,19 +12,25 @@ import {
   IsInt,
   ArrayNotEmpty,
   Min,
-  
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import type { TransferTransactionData,TranSectionType,TranStatus, TransferTransactionType,CashCountData } from './../../../types';
+import type {
+  TransferTransactionData,
+  TranSectionType,
+  TranStatus,
+  TransferTransactionType,
+  CashCountData,
+} from './../../../types';
 import { CashCountItemDto } from '../../cash-counts/dto/cash-count.dto';
 import { isOperatorNode } from 'mathjs';
 
-
-
-export class CreateTransferTransactionDto implements Omit<TransferTransactionData,'refBoothId'| 'createdAt' | 'updatedAt' | 'id'> {
+export class CreateTransferTransactionDto implements Omit<
+  TransferTransactionData,
+  'refBoothId' | 'createdAt' | 'updatedAt' | 'id'
+> {
   @IsUUID()
   @IsNotEmpty()
-  exchangeRateId: string;   // ID ของอัตราแลกเปลี่ยน
+  exchangeRateId: string; // ID ของอัตราแลกเปลี่ยน
 
   @IsString()
   @IsNotEmpty()
@@ -32,31 +38,31 @@ export class CreateTransferTransactionDto implements Omit<TransferTransactionDat
 
   @IsUUID()
   @IsOptional()
-  boothId: string;           // FK
+  boothId: string; // FK
 
   @IsUUID()
   @IsOptional()
-  ShiftId?: string | null ;
+  ShiftId?: string | null;
 
   @IsNumber()
   @IsNotEmpty()
-  amount: number;            // จำนวนเงิน
+  amount: number; // จำนวนเงิน
 
   @IsString()
   @IsNotEmpty()
-  type: TransferTransactionType;     // ประเภทการโอน
+  type: TransferTransactionType; // ประเภทการโอน
 
   @IsUUID()
   @IsOptional()
-  refBoothId?: string;        // ID บูธที่อ้างอิง
+  refBoothId?: string; // ID บูธที่อ้างอิง
 
-    @IsUUID()
+  @IsUUID()
   @IsOptional()
   refShiftId?: string | null | undefined;
 
   @IsString()
   @IsOptional()
-  description?: string;      // รายละเอียด (ใส่ ? เพราะปกติมักจะเป็น optional)
+  description?: string; // รายละเอียด (ใส่ ? เพราะปกติมักจะเป็น optional)
 
   @IsOptional()
   @IsString()
@@ -64,17 +70,20 @@ export class CreateTransferTransactionDto implements Omit<TransferTransactionDat
 
   @IsUUID()
   @IsNotEmpty()
-  userId: string;            // ผู้ทำรายการ
+  userId: string; // ผู้ทำรายการ
 
   @IsString()
-  status: TranStatus;        // สถานะ (เช่น success, pending, cancel)
+  status: TranStatus; // สถานะ (เช่น success, pending, cancel)
 
   @IsUUID()
   @IsOptional()
   shiftId?: string | null; // อนุญาตให้เป็น null ได้สำหรับบางประเภทของ transaction เช่น transfer ระหว่างบูธ
 }
 
-export class TransferBoothToBoothDto implements Omit<TransferTransactionData, 'userId'|'status' |'type'|'createdAt' | 'updatedAt' | 'id' > {
+export class TransferBoothToBoothDto implements Omit<
+  TransferTransactionData,
+  'userId' | 'status' | 'type' | 'createdAt' | 'updatedAt' | 'id'
+> {
   @IsUUID()
   @IsNotEmpty()
   boothId: string;
@@ -88,7 +97,6 @@ export class TransferBoothToBoothDto implements Omit<TransferTransactionData, 'u
   @IsInt()
   amount: number;
 
-
   @IsUUID()
   @IsNotEmpty()
   exchangeRateId: string;
@@ -100,11 +108,12 @@ export class TransferBoothToBoothDto implements Omit<TransferTransactionData, 'u
   @IsString()
   @IsOptional()
   description?: string;
-
-
 }
 
-export class TransferCenterToBoothDto implements Omit<TransferTransactionData,'userId'|'refBoothId' |'type'|'createdAt' | 'updatedAt' | 'id' > {
+export class TransferCenterToBoothDto implements Omit<
+  TransferTransactionData,
+  'userId' | 'refBoothId' | 'type' | 'createdAt' | 'updatedAt' | 'id'
+> {
   @IsUUID()
   @IsNotEmpty()
   boothId: string;
@@ -121,7 +130,6 @@ export class TransferCenterToBoothDto implements Omit<TransferTransactionData,'u
   @IsString()
   type: TransferTransactionType; // กำหนดเป็น optional และใช้ TransferTransactionType แทน TranSectionType เพราะเราต้องการระบุประเภทการโอนที่ชัดเจน เช่น 'TRANSFER_IN' หรือ 'TRANSFER_OUT'
 
-
   @IsString()
   @IsOptional()
   description?: string;
@@ -129,10 +137,18 @@ export class TransferCenterToBoothDto implements Omit<TransferTransactionData,'u
   @IsString()
   @IsOptional()
   status: TranStatus;
-
 }
 
-export class TranferCashcountDto implements Omit<TransferTransactionData,'userId'|'refBoothId' |'type'|'createdAt' | 'updatedAt' | 'id' | 'exchangeRateId' > {
+export class TranferCashcountDto implements Omit<
+  TransferTransactionData,
+  | 'userId'
+  | 'refBoothId'
+  | 'type'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'id'
+  | 'exchangeRateId'
+> {
   @IsUUID()
   @IsNotEmpty()
   boothId: string;
@@ -155,7 +171,6 @@ export class TranferCashcountDto implements Omit<TransferTransactionData,'userId
   status: TranStatus;
 }
 
-
 export class UpdateTransferTransactionDto {
   @IsString()
   @IsOptional()
@@ -166,7 +181,10 @@ export class UpdateTransferTransactionDto {
   status?: string;
 }
 
-export class GetTransfersByBoothDto implements Pick<TransferTransactionData, 'boothId'> {
+export class GetTransfersByBoothDto implements Pick<
+  TransferTransactionData,
+  'boothId'
+> {
   @IsUUID()
   @IsNotEmpty()
   boothId: string;
@@ -196,4 +214,3 @@ export class FirstShiftCashCountDto {
   @Type(() => CashCountItemDto)
   cashCountDto: CashCountItemDto[];
 }
-

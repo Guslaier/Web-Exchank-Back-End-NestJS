@@ -5,12 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Shift } from './entities/shift.entity';
 import { BoothsModule } from '../../modules/booths/booths.module';
 import { SystemLogsModule } from '../../modules/system-logs/system-logs.module';
-import { SseModule } from '../../modules/sse/sse.module' ; 
-import { CashCountsModule } from './../../modules/cash-counts/cash-counts.module' ; 
-import { TransactionsModule } from './../../modules/transactions/transactions.module'
+import { SseModule } from '../../modules/sse/sse.module';
+import { CashCountsModule } from './../../modules/cash-counts/cash-counts.module';
+import { TransactionsModule } from './../../modules/transactions/transactions.module';
 import { RedisModule } from '../../modules/redis/redis.module';
 import { SharedTransactionsModule } from '../shared-transactions/shared-transactions.module';
-
 
 @Module({
   imports: [

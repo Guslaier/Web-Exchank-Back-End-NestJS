@@ -17,7 +17,7 @@ export class AuthService {
     private dataSource: DataSource,
     @Inject(SystemLogsService)
     private readonly systemLogsService: SystemLogsService,
-    @Inject('REDIS_CLIENT') 
+    @Inject('REDIS_CLIENT')
     private readonly redisClient: Redis,
   ) {}
 
@@ -86,7 +86,7 @@ export class AuthService {
           action: 'LOGIN_SUCCESS',
           details: `User logged in from IP: ${ip}`,
         },
-        manager
+        manager,
       );
 
       return {
@@ -126,7 +126,7 @@ export class AuthService {
           action: 'LOGOUT_SUCCESS',
           details: `Session terminated (JTI: ${decoded.jti})`,
         },
-        manager
+        manager,
       );
 
       return { message: 'Logged out successfully' };

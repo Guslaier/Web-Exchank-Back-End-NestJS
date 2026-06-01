@@ -12,7 +12,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import { GetPreviousShift , GetShifts , PutShiftBody } from './dto/report.dto';
+import { GetPreviousShift, GetShifts, PutShiftBody } from './dto/report.dto';
 import { ReportsService } from './reports.service';
 
 @Controller('reports')
@@ -26,11 +26,16 @@ export class ReportsController {
     return this.reportService.getPreviousShiftData(user, query.id);
   }
 
-  @UseGuards(JwtAuthGuard , RolesGuard)
-  @Roles('ADMIN' , 'MANAGER') 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MANAGER')
   @Get('shifts')
-  getShfits(@CurrentUser() user : any  , @Query() query : GetShifts) {
-    return this.reportService.getShiftsReport(user , query.status , query.from , query.to) ; 
+  getShfits(@CurrentUser() user: any, @Query() query: GetShifts) {
+    return this.reportService.getShiftsReport(
+      user,
+      query.status,
+      query.from,
+      query.to,
+    );
   }
 
   //==================report employee performance ================
@@ -48,12 +53,16 @@ export class ReportsController {
 
   // 2. ดึงข้อมูลภาพรวม (รองรับทั้ง All และ Range ใน Path เดียว)
   @Get()
-  getAll(@Query('startDate') start?: string, @Query('endDate') end?: string, @Query('withShifts') withShifts: string = 'false') {
+  getAll(
+    @Query('startDate') start?: string,
+    @Query('endDate') end?: string,
+    @Query('withShifts') withShifts: string = 'false',
+  ) {
     if (start && end) {
       return this.reportService.getAllEmployeePerformance(
         new Date(start),
         new Date(end),
-        withShifts === 'true'
+        withShifts === 'true',
       );
     }
     return this.reportService.getAllEmployeePerformance();

@@ -29,7 +29,6 @@ import { CurrenciesService } from '../currencies/currencies.service';
 import { In, ReadPreference } from 'typeorm';
 import { CashCountsService } from '../cash-counts/cash-counts.service';
 
-
 @Controller('transfer-transactions')
 export class TransferTransactionsController {
   constructor(
@@ -97,11 +96,13 @@ export class TransferTransactionsController {
     );
   }
 
-  @UseGuards(JwtAuthGuard , RolesGuard) 
-  @Roles('ADMIN' , 'MANAGER')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'MANAGER')
   @Get('booth/shift/:shiftId')
-  async getAmountTypeStatusByShiftId(@Param('shiftId') shiftId : string) {
-    return this.transferTransactionsService.getAmountTypeStatusByShiftId(shiftId); 
+  async getAmountTypeStatusByShiftId(@Param('shiftId') shiftId: string) {
+    return this.transferTransactionsService.getAmountTypeStatusByShiftId(
+      shiftId,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -161,4 +162,3 @@ export class TransferTransactionsController {
     return this.transferTransactionsService.deleteFirstCashcount(user, shiftId);
   }
 }
-

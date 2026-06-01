@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Header } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+  Header,
+} from '@nestjs/common';
 import { BoothsService } from './booths.service';
 import { CreateBoothDto, UpdateBoothDto } from './dto/booth.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
@@ -10,12 +20,11 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 export class BoothsController {
   constructor(private readonly boothsService: BoothsService) {}
 
-
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MANAGER')
   @Post('create')
   create(@CurrentUser() user: any, @Body() createBoothDto: CreateBoothDto) {
-    return this.boothsService.create(user,createBoothDto);
+    return this.boothsService.create(user, createBoothDto);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -33,11 +42,14 @@ export class BoothsController {
     return this.boothsService.findOne(id);
   }
 
-
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MANAGER')
   @Put('update/:id')
-  update(@CurrentUser() user: any, @Param('id') id: string, @Body() updateBoothDto: UpdateBoothDto) {
+  update(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body() updateBoothDto: UpdateBoothDto,
+  ) {
     return this.boothsService.update(user, id, updateBoothDto);
   }
 
@@ -48,14 +60,16 @@ export class BoothsController {
     return this.boothsService.remove(user, id);
   }
 
-
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'MANAGER')
   @Put('set-currentshift/:id')
-  setCurrentShift(@CurrentUser() user: any, @Param('id') id: string, @Body('shiftId') shiftId: string) {
+  setCurrentShift(
+    @CurrentUser() user: any,
+    @Param('id') id: string,
+    @Body('shiftId') shiftId: string,
+  ) {
     return this.boothsService.setCurrentShift(user, id, shiftId);
   }
-
 
   @UseGuards(JwtAuthGuard)
   @Put('set-deactive/:id')
@@ -67,13 +81,16 @@ export class BoothsController {
   @Roles('ADMIN', 'MANAGER')
   @Put('set-reactive/:id')
   setReActive(@CurrentUser() user: any, @Param('id') id: string) {
-    return this.boothsService.setReActive(user,id);
+    return this.boothsService.setReActive(user, id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('find-by-shift/:shiftId')
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate')
-  findBoothByShiftId(@CurrentUser() user: any, @Param('shiftId') shiftId: string) { 
+  findBoothByShiftId(
+    @CurrentUser() user: any,
+    @Param('shiftId') shiftId: string,
+  ) {
     return this.boothsService.findBoothByShiftId(shiftId);
-  } 
+  }
 }

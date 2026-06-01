@@ -8,7 +8,7 @@ import { SystemLogsService } from '../../modules/system-logs/system-logs.service
 import { CurrenciesService } from '../../modules/currencies/currencies.service';
 import { CashCount } from './entities/cash-count.entity';
 import { CreateCashCountDto, GetCashCountDto } from './dto/cash-count.dto';
-import { EntityManager, Repository , Not } from 'typeorm';
+import { EntityManager, Repository, Not } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transaction } from '../transactions/entities/transaction.entity';
 import { TransferTransaction } from '../transfer-transactions/entities/transfer-transaction.entity';
@@ -136,19 +136,21 @@ export class CashCountsService {
     };
   }
 
-  async getCashCountByShiftId(shiftId : string) {
-    // เพิ่ม deletedAt ลง transaction แล้ว Query เฉพาะออกมาที่เป็น null 
+  async getCashCountByShiftId(shiftId: string) {
+    // เพิ่ม deletedAt ลง transaction แล้ว Query เฉพาะออกมาที่เป็น null
     // ใช้การ join กับ tranfer transaction  เพิ่มเพื่อดึงข้อมูลเฉพาะที่ยังไม่ถูก softdelete
 
-
-    const cashCountData = await this.cashCountRepository.query(`
+    const cashCountData = await this.cashCountRepository.query(
+      `
         select cc.denomination , cc.amount from cash_counts cc
         join transactions t on cc."transactionId" = t.id
         join shifts s on t."shiftId" = s.id
         join transfer_transactions tt on t.id = tt.id 
-        where s.id = $1 and  tt."deletedAt" is null and ((s.status != 'COMPLETED' and t."type" = 'FIRST_SHIFT_CASH_COUNT')  or (s.status = 'COMPLETED' and t."type" = 'CLOSE_SHIFT_CASH_COUNT'))  
-      ` ,[shiftId]) ;
+        where s.id = $1 and  tt."deletedAt" is null and t."type" = 'FIRST_SHIFT_CASH_COUNT'  
+      `,
+      [shiftId],
+    );
 
-    return cashCountData ;
+    return cashCountData;
   }
 }

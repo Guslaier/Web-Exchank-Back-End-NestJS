@@ -1,6 +1,15 @@
 import { TimestampTransformer } from '../../../common/helper/timestamp';
 import { User } from '../../users/entities/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToMany, ManyToOne, DeleteDateColumn, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToMany,
+  ManyToOne,
+  DeleteDateColumn,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity('system_logs')
 export class SystemLog {
@@ -10,10 +19,9 @@ export class SystemLog {
   @Column({ nullable: true })
   userId: string | null;
 
-  @ManyToOne(()=> User, { nullable: true }) 
-  @JoinColumn({name:'userId'}) 
-  user: User ;
-
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column()
   action: string;
@@ -21,9 +29,13 @@ export class SystemLog {
   @Column({ type: 'text', nullable: true })
   details: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" , transformer: TimestampTransformer })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   createdAt: Date;
 
-  @DeleteDateColumn({transformer: TimestampTransformer})
+  @DeleteDateColumn({ transformer: TimestampTransformer })
   deletedAt?: Date;
 }

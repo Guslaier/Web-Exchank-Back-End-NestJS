@@ -38,7 +38,7 @@ export class ExclusiveExchangeRate {
   @Column('decimal', { precision: 17, scale: 6, default: 0 })
   buy_rate_max: number;
 
-  @ManyToOne(() => Booth ,(booth) => booth.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Booth, (booth) => booth.id, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'booth_id' })
   booth: Booth;
 
@@ -64,9 +64,13 @@ export class ExclusiveExchangeRate {
   @Column({ nullable: true })
   system_remark: string;
 
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" ,transformer:TimestampTransformer })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   updated_at: Date;
 
-  @DeleteDateColumn({transformer:TimestampTransformer})
+  @DeleteDateColumn({ transformer: TimestampTransformer })
   deleted_at: Date;
 }

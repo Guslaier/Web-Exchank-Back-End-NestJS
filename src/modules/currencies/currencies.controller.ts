@@ -10,7 +10,7 @@ import {
   Header,
 } from '@nestjs/common';
 import { CurrenciesService } from './currencies.service';
-import { CurrencyUpdateModeDto, UpdateMode } from './dto/currency.dto';
+import { CurrencyUpdateModeDto } from './dto/currency.dto';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -36,14 +36,14 @@ export class CurrenciesController {
   async syncWithBot() {
     return await this.currenciesService.updateAutoRateAll();
   }
-
-
+  // 3. ตั้งค่าโหมดการอัปเดต (Auto/Manual) แบบ Bulk Update - ส่งมาเป็น Array
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER', 'ADMIN')
   @Patch('mode')
   async setModeBulk(
-    @CurrentUser() user: any, 
-    @Body('data') updateData: CurrencyUpdateModeDto[]) {
+    @CurrentUser() user: any,
+    @Body('data') updateData: CurrencyUpdateModeDto[],
+  ) {
     return await this.currenciesService.setUpdateModeBulk(user, updateData);
   }
 
@@ -51,7 +51,8 @@ export class CurrenciesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER', 'ADMIN')
   @Patch('manual-update')
-  async updateManualBulk(@CurrentUser() user: any,
+  async updateManualBulk(
+    @CurrentUser() user: any,
     @Body('data') data: { id: string; buyRate: number; sellRate: number }[],
   ) {
     return await this.currenciesService.updateManualBulk(user, data);

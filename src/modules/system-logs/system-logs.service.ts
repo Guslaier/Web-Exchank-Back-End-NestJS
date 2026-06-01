@@ -88,22 +88,22 @@ export class SystemLogsService {
     query.startDate.setHours(0, 0, 0, 0);
     query.endDate.setHours(23, 59, 59, 999);
     const logs = await this.systemLogRepo.find({
-      relations : {
-        user : true
-      } , 
+      relations: {
+        user: true,
+      },
       where: {
         createdAt: Between(query.startDate, query.endDate),
       },
-      select : {
-        user : {
-          username : true ,
+      select: {
+        user: {
+          username: true,
         },
-        userId : true ,
-        id : true ,
-        action : true ,
-        details : true ,
-        createdAt : true ,
-      } , 
+        userId: true,
+        id: true,
+        action: true,
+        details: true,
+        createdAt: true,
+      },
       order: {
         createdAt: 'ASC',
       },
@@ -118,7 +118,7 @@ export class SystemLogsService {
   // system-logs.service.ts
 
   async cleanupOldLogs() {
-    const retentionMonths = 4 ;// กำหนดระยะเวลาการเก็บรักษาเป็น 4 เดือน
+    const retentionMonths = 4; // กำหนดระยะเวลาการเก็บรักษาเป็น 4 เดือน
     const cutOffDate = new Date();
     cutOffDate.setMonth(cutOffDate.getMonth() - retentionMonths);
 

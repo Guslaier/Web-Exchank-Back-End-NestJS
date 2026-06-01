@@ -1,7 +1,10 @@
 import { IsString, IsNotEmpty, IsEmail, IsBoolean } from 'class-validator';
 import { UserData } from 'index';
 
-export class CreateUserDto implements Omit<UserData, 'isActive'|'id' | 'createdAt' | 'updatedAt'|'passwordHash'> {
+export class CreateUserDto implements Omit<
+  UserData,
+  'isActive' | 'id' | 'createdAt' | 'updatedAt' | 'passwordHash'
+> {
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -22,7 +25,10 @@ export class CreateUserDto implements Omit<UserData, 'isActive'|'id' | 'createdA
   @IsNotEmpty()
   role: 'MANAGER' | 'EMPLOYEE' | 'ADMIN';
 }
-export class CreateUserResponseDto implements Omit<UserData, 'passwordHash' | 'isActive'|'createdAt' | 'updatedAt'|'id'> {
+export class CreateUserResponseDto implements Omit<
+  UserData,
+  'passwordHash' | 'isActive' | 'createdAt' | 'updatedAt' | 'id'
+> {
   @IsEmail()
   @IsNotEmpty()
   email: string;
@@ -37,7 +43,6 @@ export class CreateUserResponseDto implements Omit<UserData, 'passwordHash' | 'i
   @IsNotEmpty()
   role: 'MANAGER' | 'EMPLOYEE' | 'ADMIN';
 }
-
 
 export class UserDto {
   @IsEmail()
@@ -50,7 +55,7 @@ export class UserDto {
 
   @IsString()
   @IsNotEmpty()
-  role: 'MANAGER' | 'EMPLOYEE'| 'ADMIN';
+  role: 'MANAGER' | 'EMPLOYEE' | 'ADMIN';
 
   @IsString()
   @IsNotEmpty()
@@ -75,8 +80,10 @@ export class ChangePasswordDto implements Pick<UserData, 'id'> {
   newPassword: string;
 }
 
-
-export class UpdateUserDto implements Omit<UserData, 'isActive'|'id' | 'createdAt' | 'updatedAt' | 'passwordHash'> {
+export class UpdateUserDto implements Omit<
+  UserData,
+  'isActive' | 'id' | 'createdAt' | 'updatedAt' | 'passwordHash'
+> {
   @IsEmail()
   @IsNotEmpty()
   email: string;

@@ -9,6 +9,5 @@ import { SystemLog } from './entities/system-log.entity';
   controllers: [SystemLogsController],
   providers: [SystemLogsService],
   exports: [SystemLogsService],
-  
 })
 export class SystemLogsModule {}

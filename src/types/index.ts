@@ -60,45 +60,56 @@ export interface ShiftData {
 }
 
 export class ShiftDetail {
-    shiftid : string | null = null ;
-    userid : string | null = null ; 
-    name : string  = '' ; 
-    username : string | null = null  ; 
-    location : string | null =  '' ;  
-    isActive : boolean  = true ;  
-    status : string  | null  = '' ;    
-    cashcount :  CashCountInput[] = [] ; 
-    tranfer : Tranfersum[]  = []  ;
-    exchange : ExchangeSum[]  = [] ; 
-    balance_check : number | null = null ; 
-    cash_advance : number | null = null ; 
+  shiftid: string | null = null;
+  userid: string | null = null;
+  name: string = '';
+  username: string | null = null;
+  location: string | null = '';
+  isActive: boolean = true;
+  status: string | null = '';
+  cashcount: CashCountInput[] = [];
+  tranfer: Tranfersum[] = [];
+  exchange: ExchangeSum[] = [];
+  balance_check: number | null = null;
+  cash_advance: number | null = null;
 
-    constructor(name : string , location : string | null, active : boolean  , userid : string | null , username : string | null,   ) {
-      this.name = name ; 
-      this.location = location ; 
-      this.isActive = active ; 
-      this.userid = userid ; 
-      this.username = username ;
-    }
+  constructor(
+    name: string,
+    location: string | null,
+    active: boolean,
+    userid: string | null,
+    username: string | null,
+  ) {
+    this.name = name;
+    this.location = location;
+    this.isActive = active;
+    this.userid = userid;
+    this.username = username;
+  }
 
-    setShiftData(id : string , status : string , cash_advance : number | null , balance_check : number | null) {
-      this.shiftid = id ; 
-      this.status = status ; 
-      this.cash_advance =cash_advance ;
-      this.balance_check = balance_check ; 
-    }
+  setShiftData(
+    id: string,
+    status: string,
+    cash_advance: number | null,
+    balance_check: number | null,
+  ) {
+    this.shiftid = id;
+    this.status = status;
+    this.cash_advance = cash_advance;
+    this.balance_check = balance_check;
+  }
 
-    setCashcount(cc : CashCountInput[]) {
-      this.cashcount =  cc ;
-    }
+  setCashcount(cc: CashCountInput[]) {
+    this.cashcount = cc;
+  }
 
-    setTrafer(tranfer : Tranfersum[]) {
-      this.tranfer = tranfer ; 
-    }
+  setTrafer(tranfer: Tranfersum[]) {
+    this.tranfer = tranfer;
+  }
 
-    setExchange(exchange : ExchangeSum[]) {
-      this.exchange = exchange
-    }
+  setExchange(exchange: ExchangeSum[]) {
+    this.exchange = exchange;
+  }
 }
 
 //== Customer Interfaces ==//
@@ -141,7 +152,10 @@ export interface TransferTransactionData {
   updatedAt: Date;
 }
 
-export type Tranfersum = Pick<TransferTransactionData , 'amount' | 'type' | 'status'>
+export type Tranfersum = Pick<
+  TransferTransactionData,
+  'amount' | 'type' | 'status'
+>;
 
 export interface ExchangeTransactionData {
   readonly id: string; // PK, FK
@@ -161,14 +175,11 @@ export interface ExchangeTransactionData {
   createdAt: Date;
 }
 
-
-
 export interface ExchangeSum {
-  type : string , 
-  exchangeRate: number ,
-  foreignCurrencyAmount : number , 
-  status : string ,
-
+  type: string;
+  exchangeRate: number;
+  foreignCurrencyAmount: number;
+  status: string;
 }
 
 export interface CashCountData {
@@ -181,8 +192,7 @@ export interface CashCountData {
   updatedAt: Date;
 }
 
-export type CashCountInput = Pick<CashCountData , 'denomination' | 'amount'> 
- 
+export type CashCountInput = Pick<CashCountData, 'denomination' | 'amount'>;
 
 //== Currency Interfaces ==//
 export interface CurrencyIF {
@@ -207,7 +217,6 @@ export interface ExchangeRate {
   createdAt: Date;
   updatedAt: Date;
 }
-
 
 export interface ExclusiveExchangeRate {
   readonly exchangeRateId: string; // PK, FK (เชื่อมกลับไปยัง exchange_rates)

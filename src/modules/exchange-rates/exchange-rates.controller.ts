@@ -46,7 +46,7 @@ export class ExchangeRatesController {
   @Post('bulk-update')
   async mutiUpdate(
     @CurrentUser() user: any,
-    @Body('updates') updates:  Partial<ExchangeRate> [],
+    @Body('updates') updates: Partial<ExchangeRate>[],
   ) {
     console.log('Received bulk update request in controller:', updates);
     return await this.exchangeRatesService.Mutiupdate(user, updates);
@@ -56,9 +56,7 @@ export class ExchangeRatesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER', 'ADMIN')
   @Patch('sync/force-all')
-  async syncAll(
-    @CurrentUser() user: any,
-  ) {
+  async syncAll(@CurrentUser() user: any) {
     await this.exchangeRatesService.updateRateAll(user);
     return { message: 'All child rates have been recalculated successfully' };
   }
@@ -69,7 +67,8 @@ export class ExchangeRatesController {
   @Delete(':id')
   async remove(
     @CurrentUser() user: any,
-    @Param('id', ParseUUIDPipe) id: string) {
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
     await this.exchangeRatesService.delete(user, id);
     return { message: 'Deleted successfully' };
   }

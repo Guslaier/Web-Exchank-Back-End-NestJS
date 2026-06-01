@@ -11,7 +11,7 @@ import { InputValidator } from './helper/input-validator';
 import { Transaction } from 'typeorm';
 import { TransactionsModule } from './../../modules/transactions/transactions.module';
 import { CashCountsModule } from './../../modules/cash-counts/cash-counts.module';
-import { ExclusiveExchangeRatesModule} from './../../modules/exclusive-exchange-rates/exclusive-exchange-rates.module';
+import { ExclusiveExchangeRatesModule } from './../../modules/exclusive-exchange-rates/exclusive-exchange-rates.module';
 import { StocksModule } from './../../modules/stocks/stocks.module';
 import { SseModule } from '../sse/sse.module';
 
@@ -29,7 +29,7 @@ import { SseModule } from '../sse/sse.module';
     SseModule,
   ],
   controllers: [ExchangeTransactionsController],
-  providers: [ExchangeTransactionsService , InputValidator],
+  providers: [ExchangeTransactionsService, InputValidator],
   exports: [ExchangeTransactionsService],
 })
 export class ExchangeTransactionsModule {}

@@ -21,8 +21,8 @@ import {
 } from 'typeorm';
 import { SystemLogsService } from '../../modules/system-logs/system-logs.service';
 import { CashCountsService } from './../../modules/cash-counts/cash-counts.service';
-import { TransactionsService } from './../../modules/transactions/transactions.service' ; 
-import { SseService } from './../../modules/sse/sse.service' ; 
+import { TransactionsService } from './../../modules/transactions/transactions.service';
+import { SseService } from './../../modules/sse/sse.service';
 import Redis from 'ioredis';
 import { SharedTransactionsService } from '../shared-transactions/shared-transactions.service';
 import {
@@ -30,12 +30,12 @@ import {
   QueryShiftId,
   ShiftIdDto,
   BoothIdDto,
-  ShiftAuditBody , 
-  ShiftAuditParam 
+  ShiftAuditBody,
+  ShiftAuditParam,
 } from './dto/shift.dto';
 import { isUUID } from 'class-validator';
 import { handleError } from '../../common/error/error';
-import { ShiftDetail } from './../../types/index' ;
+import { ShiftDetail } from './../../types/index';
 
 @Injectable()
 export class ShiftsService {
@@ -44,9 +44,9 @@ export class ShiftsService {
     @InjectRepository(Shift)
     private readonly shiftRepository: Repository<Shift>,
     private readonly systemLogsService: SystemLogsService,
-    private readonly cashCountServicee : CashCountsService , 
-    private readonly transactionService : TransactionsService , 
-    private readonly sseService : SseService ,
+    private readonly cashCountServicee: CashCountsService,
+    private readonly transactionService: TransactionsService,
+    private readonly sseService: SseService,
     @Inject('REDIS_CLIENT')
     private readonly redisClient: Redis,
     private readonly dataSource: DataSource,
@@ -73,95 +73,158 @@ export class ShiftsService {
     userId: string,
     boothId: string,
     manager: EntityManager,
-    today = true 
+    today = true,
   ) {
     const shiftRepo = manager.getRepository(Shift);
-    const now = new Date() ; 
-    const startTime = today ? now : new Date(now.getFullYear() , now.getMonth() , (now.getDate() + 1) , 8 ,0 ,0 ,0) ; 
-    const status = today ? 'OPEN' : 'CLOSE' ; 
+    const now = new Date();
+    const startTime = today
+      ? now
+      : new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + 1,
+          8,
+          0,
+          0,
+          0,
+        );
+    const status = today ? 'OPEN' : 'CLOSE';
     const row = shiftRepo.create({
       userId: userId,
       boothId: boothId,
-      startTime : startTime , 
-      status : status
+      startTime: startTime,
+      status: status,
     });
 
     try {
       const savedShift = await shiftRepo.save(row);
-      const logQuery  = await this.log(currentUser,'OPEN_SHIFT_SUCCESS',`Shift id : ${savedShift.id} was opened by User id : ${currentUser.id}`,manager,);
-      this.sseService.triggerRefreshBoothId(boothId) ;  
-      return savedShift ; 
+      const logQuery = await this.log(
+        currentUser,
+        'OPEN_SHIFT_SUCCESS',
+        `Shift id : ${savedShift.id} was opened by User id : ${currentUser.id}`,
+        manager,
+      );
+      this.sseService.triggerRefreshBoothId(boothId);
+      return savedShift;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
-      await this.log(currentUser,'OPEN_SHIFT_FAILED',`internal server error: ${errorMessage}`,manager,);
-      throw new InternalServerErrorException('error in internal server. please contact admin.',);
+      await this.log(
+        currentUser,
+        'OPEN_SHIFT_FAILED',
+        `internal server error: ${errorMessage}`,
+        manager,
+      );
+      throw new InternalServerErrorException(
+        'error in internal server. please contact admin.',
+      );
     }
   }
 
   async openShift(currentUser: any, body: BoothIdDto) {
-    const boothId = body.boothId ;
-    const boothData = await this.boothService.getBoothIfExist(boothId) ; 
+    const boothId = body.boothId;
+    const boothData = await this.boothService.getBoothIfExist(boothId);
 
-     if (boothData == null) {
-      await this.log(currentUser , 'OPEN_SHIFT_FAILED' , 'Booth is not found with sent id.') ; 
-      throw new NotFoundException('Booth is not found with sent id.') ; 
-    } 
+    if (boothData == null) {
+      await this.log(
+        currentUser,
+        'OPEN_SHIFT_FAILED',
+        'Booth is not found with sent id.',
+      );
+      throw new NotFoundException('Booth is not found with sent id.');
+    }
 
     if (boothData.currentShiftId == null) {
-      await this.log(currentUser , 'OPEN_SHIFT_FAILED' , 'Booth has not assigend with any employee.') ; 
-      throw new BadRequestException('This booth has not been assinged with any employee') ; 
-    } 
+      await this.log(
+        currentUser,
+        'OPEN_SHIFT_FAILED',
+        'Booth has not assigend with any employee.',
+      );
+      throw new BadRequestException(
+        'This booth has not been assinged with any employee',
+      );
+    }
 
-    const shiftData = await this.getLastShiftByBoothId(boothId , false) ; 
+    const shiftData = await this.getLastShiftByBoothId(boothId, false);
     if (shiftData == null) {
-      return await this.dataSource.transaction(async(manager)=>{
+      return await this.dataSource.transaction(async (manager) => {
         try {
-         return await this.create(currentUser , boothData.currentShiftId as string   , boothId , manager);
+          return await this.create(
+            currentUser,
+            boothData.currentShiftId as string,
+            boothId,
+            manager,
+          );
+        } catch (err) {
+          handleError(err, 'ShiftsService.openShift');
         }
-        catch(err) {
-          handleError(err, 'ShiftsService.openShift') ; 
-        } 
       });
-    } 
+    }
 
     if (shiftData?.userId === boothData?.currentShiftId) {
       //completed ห้าม ที่เหลือ set เป็น OPEN
-      return await this.dataSource.transaction(async (manager) =>{
+      return await this.dataSource.transaction(async (manager) => {
         try {
-          const today = new Date() ; 
-          today.setHours(23,59,59,9999) ; 
-            
-          if (shiftData.startTime > today  ) {
-              await this.log(currentUser , 'OPEN_SHIFT_FAILED' , `Tomorrow shift is alreay created. This Booth id : ${boothId} can't open shift anymore.` , manager)
-              throw new ConflictException(`Today shift already completed and tomorrow shift is alreay created. This Booth id : ${boothId} can't open shift anymore.`) ;
+          const today = new Date();
+          today.setHours(23, 59, 59, 9999);
+
+          if (shiftData.startTime > today) {
+            await this.log(
+              currentUser,
+              'OPEN_SHIFT_FAILED',
+              `Tomorrow shift is alreay created. This Booth id : ${boothId} can't open shift anymore.`,
+              manager,
+            );
+            throw new ConflictException(
+              `Today shift already completed and tomorrow shift is alreay created. This Booth id : ${boothId} can't open shift anymore.`,
+            );
           }
 
           if (shiftData.status === 'COMPLETED') {
-            return await this.create(currentUser , boothData.currentShiftId as string , boothId , manager , false ) ;
+            return await this.create(
+              currentUser,
+              boothData.currentShiftId as string,
+              boothId,
+              manager,
+              false,
+            );
           }
 
-          return await this.setStatusToOpen(currentUser , shiftData.id , shiftData.status , manager) ; 
+          return await this.setStatusToOpen(
+            currentUser,
+            shiftData.id,
+            shiftData.status,
+            manager,
+          );
+        } catch (err) {
+          handleError(err, 'ShiftsService.openShift');
         }
-        catch (err) {
-          handleError(err, 'ShiftsService.openShift') ; 
-        }
-      }) ;       
+      });
     }
 
     if (shiftData?.userId !== boothData?.currentShiftId) {
       if (shiftData.status === 'OPEN') {
-          await this.log(currentUser , 'OPEN_SHIFT_FAILED' , `Last shift id : ${shiftData.id} is still open.`) ;
-          throw new ConflictException(`Last shift id : ${shiftData.id} is still open. Pleast close or audit it first.`) ; 
-        }
+        await this.log(
+          currentUser,
+          'OPEN_SHIFT_FAILED',
+          `Last shift id : ${shiftData.id} is still open.`,
+        );
+        throw new ConflictException(
+          `Last shift id : ${shiftData.id} is still open. Pleast close or audit it first.`,
+        );
+      }
 
-      return await this.dataSource.transaction(async (manager) =>{
+      return await this.dataSource.transaction(async (manager) => {
         try {
-            return await this.create(currentUser , boothData.currentShiftId as string , boothId , manager) ;
+          return await this.create(
+            currentUser,
+            boothData.currentShiftId as string,
+            boothId,
+            manager,
+          );
+        } catch (err) {
+          handleError(err, 'ShiftsService.openShift');
         }
-        catch (err) {
-          handleError(err, 'ShiftsService.openShift') ; 
-        }
-      }) ;       
+      });
     }
   }
 
@@ -185,7 +248,6 @@ export class ShiftsService {
     end.setHours(23, 59, 59, 999);
 
     try {
-
       return await this.shiftRepository.query(
         `select id , "boothId" , "userId" , total_receive , total_exchange , balance , status , "startTime" 
                 from shifts   
@@ -198,35 +260,35 @@ export class ShiftsService {
     }
   }
 
-  async getShiftsByStatus(status : string , from : Date , to : Date){
-      const shiftsData = await this.shiftRepository.find({
-        relations : {
-            user : true ,
-            booth : true ,  
+  async getShiftsByStatus(status: string, from: Date, to: Date) {
+    const shiftsData = await this.shiftRepository.find({
+      relations: {
+        user: true,
+        booth: true,
+      },
+      where: {
+        status: status,
+        startTime: Between(from, to),
+      },
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        balance_check: true,
+        cash_advance: true,
+        booth: {
+          id: true,
+          name: true,
         },
-        where : { 
-          status : status ,
-          startTime : Between(from , to) ,  
-        } ,
-        select : {
-          id : true , 
-          startTime : true , 
-          endTime : true , 
-          balance_check : true , 
-          cash_advance : true , 
-          booth : {
-            id : true ,
-            name : true , 
-          },
-          user : {
-            id : true ,
-            username : true ,
-          }
-        }
-      })
+        user: {
+          id: true,
+          username: true,
+        },
+      },
+    });
 
-      return shiftsData ;
-  } ;
+    return shiftsData;
+  }
 
   async getActiveShifts(query: QueryDateDto) {
     if (!query.startDate || !query.endDate) {
@@ -257,8 +319,7 @@ export class ShiftsService {
       throw new InternalServerErrorException('Internal Server Error');
     }
   }
-  
-  
+
   async getLastShiftByUserId(userId: string) {
     const fromDate = new Date();
     const toDate = new Date();
@@ -286,29 +347,30 @@ export class ShiftsService {
     const fromDate = new Date();
     const toDate = new Date();
     fromDate.setHours(0, 0, 0, 0);
-    toDate.setDate(toDate.getDate() + 1) ; 
+    toDate.setDate(toDate.getDate() + 1);
     toDate.setHours(23, 59, 59, 999);
 
     const shiftQuery = this.shiftRepository.find({
-      where: { boothId: boothId, startTime: Between(fromDate, toDate)  },
+      where: { boothId: boothId, startTime: Between(fromDate, toDate) },
       order: { createdAt: 'DESC' },
       take: 1,
     });
     const shifts = await shiftQuery;
 
-    if(shifts.length === 0 ) {
+    if (shifts.length === 0) {
       if (required) {
         throw new NotFoundException('No shift found for this booth today.');
-      } else
-      { return null ; 
-      }   
+      } else {
+        return null;
+      }
     }
 
     return shifts.length > 0 ? shifts[0] : null;
   }
 
-  async getNonOpenPreviousShiftByBoothId(boothId : string) {
-      const shiftDatas = await this.shiftRepository.query(`
+  async getNonOpenPreviousShiftByBoothId(boothId: string) {
+    const shiftDatas = await this.shiftRepository.query(
+      `
             select s.id , u."username" , b.name , s.cash_advance  , s.balance_check  , s."startTime"  , s."endTime" 
             from shifts s 
             join users u on s."userId" = u.id 
@@ -316,11 +378,11 @@ export class ShiftsService {
             where s.status = 'COMPLETED' and b.id = $1
             order by s."startTime" desc limit 1 
         `,
-        [boothId]) ; 
+      [boothId],
+    );
 
-      return shiftDatas ? shiftDatas[0] : null ; 
+    return shiftDatas ? shiftDatas[0] : null;
   }
-  
 
   async getShiftById(shiftId: string | undefined) {
     if (!shiftId || !isUUID(shiftId)) {
@@ -334,148 +396,248 @@ export class ShiftsService {
     return shift;
   }
 
-    async getShiftWithCloseStatusOrFail(user : any ,id : string , message : string) {
-      const shiftData = await this.getShiftById(id) ; 
-      if(!shiftData) {
-        await this.log(user , `${message}_FAILED` , `Shift not fount from sent id : ${id}.`) ;
-        throw new NotFoundException('Shift not found.') ; 
-      }
-
-      if(shiftData.status !== 'CLOSE') {
-        await this.log(user , `${message}_FAILED` , `Shift id : ${id} is not in CLOSE status.`) ; 
-        throw new ConflictException('Shift is not in close status') ; 
-      }
-
-      return shiftData ; 
-
+  async getShiftWithCloseStatusOrFail(user: any, id: string, message: string) {
+    const shiftData = await this.getShiftById(id);
+    if (!shiftData) {
+      await this.log(
+        user,
+        `${message}_FAILED`,
+        `Shift not fount from sent id : ${id}.`,
+      );
+      throw new NotFoundException('Shift not found.');
     }
 
-  async getCashCountFromPreviousShift(boothId : string) {
-        const shiftData = await this.getNonOpenPreviousShiftByBoothId(boothId);       
-        const cashCountData = shiftData ? await this.cashCountServicee.getCashCountByShiftId(shiftData.id) : [] ; 
-        return cashCountData ; 
+    if (shiftData.status !== 'CLOSE') {
+      await this.log(
+        user,
+        `${message}_FAILED`,
+        `Shift id : ${id} is not in CLOSE status.`,
+      );
+      throw new ConflictException('Shift is not in close status');
+    }
+
+    return shiftData;
   }
 
-  async getCurrentShiftDetails(boothId : string , from : Date = new Date() , to : Date = new Date()) {
+  async getCashCountFromPreviousShift(boothId: string) {
+    const shiftData = await this.getNonOpenPreviousShiftByBoothId(boothId);
+    const cashCountData = shiftData
+      ? await this.cashCountServicee.getCashCountByShiftId(shiftData.id)
+      : [];
+    return cashCountData;
+  }
 
-    const boothData = await this.boothService.findBoothCurrentShift(boothId , from , to ) ; 
-
+  async getCurrentShiftDetails(
+    boothId: string,
+    from: Date = new Date(),
+    to: Date = new Date(),
+  ) {
+    const boothData = await this.boothService.findBoothCurrentShift(
+      boothId,
+      from,
+      to,
+    );
 
     if (!boothData) {
       return null;
     }
 
+    const shiftDetail = new ShiftDetail(
+      boothData.name,
+      boothData.location,
+      true,
+      boothData.userid,
+      boothData.username,
+    );
 
-    
-    const shiftDetail = new ShiftDetail(boothData.name , boothData.location , true  ,boothData.userid , boothData.username)  ;
+    shiftDetail.setShiftData(
+      boothData.shiftid,
+      boothData.status,
+      boothData.cash_advance,
+      boothData.balance_check,
+    );
 
-    shiftDetail.setShiftData(boothData.shiftid , boothData.status , boothData.cash_advance , boothData.balance_check) ;
+    const shiftId = boothData.shiftid;
 
-    const shiftId = boothData.shiftid ; 
+    if (shiftId) {
+      const [transferTransactions, cashCounts, exchangeTransactions] =
+        await Promise.all([
+          this.sharedTransactionsService.getAmountTypeStatusByShiftId(shiftId),
+          this.cashCountServicee.getCashCountByShiftId(shiftId),
+          this.sharedTransactionsService.getForeignAmountExchangeRateAndStatusFromShiftId(
+            shiftId,
+          ),
+        ]);
 
-   if (shiftId) {
-      const [transferTransactions, cashCounts, exchangeTransactions] = await Promise.all([
-        this.sharedTransactionsService.getAmountTypeStatusByShiftId(shiftId),
-        this.cashCountServicee.getCashCountByShiftId(shiftId),
-        this.sharedTransactionsService.getForeingAmountExchangeRateAndStatusFromShiftId(shiftId),
-      ]);
-
-      shiftDetail.setCashcount(cashCounts) ; 
-      shiftDetail.setTrafer(transferTransactions) ; 
-      shiftDetail.setExchange(exchangeTransactions) ; 
+      shiftDetail.setCashcount(cashCounts);
+      shiftDetail.setTrafer(transferTransactions);
+      shiftDetail.setExchange(exchangeTransactions);
     }
 
-    return shiftDetail ; 
+    return shiftDetail;
   }
-  
-  // update 
 
+  // update
 
-  async setStatusToOpen(currentUser : any , id : string  , previousStatus : string , manager : EntityManager) 
-  {
-    const shiftRepo  = manager.getRepository(Shift) ; 
-    const updateResult = await shiftRepo.update({id : id} , {status : 'OPEN'}) ; 
+  async setStatusToOpen(
+    currentUser: any,
+    id: string,
+    previousStatus: string,
+    manager: EntityManager,
+  ) {
+    const shiftRepo = manager.getRepository(Shift);
+    const updateResult = await shiftRepo.update({ id: id }, { status: 'OPEN' });
     if (updateResult.affected == 0) {
-      await this.log(currentUser , 'OPEN_SHIFT_FAILED' , `Can't set status Shift id : ${id} to OPEN.`,manager) ; 
-      throw new NotFoundException(`Can't set status Shift id : ${id} to OPEN.`) ;  
-    } 
+      await this.log(
+        currentUser,
+        'OPEN_SHIFT_FAILED',
+        `Can't set status Shift id : ${id} to OPEN.`,
+        manager,
+      );
+      throw new NotFoundException(`Can't set status Shift id : ${id} to OPEN.`);
+    }
 
-    await this.log(currentUser , 'OPEN_SHIFT_SUCCESS' , `Update shift id : ${id} from ${previousStatus} to OPEN`,manager) ;
-    this.sseService.triggerRefreshShiftId(id) ; 
-    return {message : 'Open shift success.'} ; 
+    await this.log(
+      currentUser,
+      'OPEN_SHIFT_SUCCESS',
+      `Update shift id : ${id} from ${previousStatus} to OPEN`,
+      manager,
+    );
+    this.sseService.triggerRefreshShiftId(id);
+    return { message: 'Open shift success.' };
   }
 
-   async setStatusToCLose(currentUser: any, body: ShiftIdDto) {
-    const isEmployee = (currentUser.role === 'EMPLOYEE') ; 
-    const id = isEmployee ? currentUser.id : body.id ; 
-    
+  async setStatusToCLose(currentUser: any, body: ShiftIdDto) {
+    const isEmployee = currentUser.role === 'EMPLOYEE';
+    const id = isEmployee ? currentUser.id : body.id;
+
     if (!id) {
-      await this.log(currentUser , 'CLOSE_SHIFT_FAILED' , `Bad argrument no id sent by this user`) ;
-      throw new BadRequestException('Shift id is requried for Non employee') ;  
+      await this.log(
+        currentUser,
+        'CLOSE_SHIFT_FAILED',
+        `Bad argrument no id sent by this user`,
+      );
+      throw new BadRequestException('Shift id is requried for Non employee');
     }
 
-    const shiftData = isEmployee ? await this.getLastShiftByUserId(id) : await this.getShiftById(id) ; 
+    const shiftData = isEmployee
+      ? await this.getLastShiftByUserId(id)
+      : await this.getShiftById(id);
 
-    if(!shiftData) {
-      const errMessage = isEmployee ? 'Shift are not found from this employee.' : `Shift are not found from this sent shift id : ${id}. ` ; 
-      await this.log(currentUser , 'CLOSE_SHIFT_FAILED' , errMessage) ;
-      throw new NotFoundException(errMessage) ; 
+    if (!shiftData) {
+      const errMessage = isEmployee
+        ? 'Shift are not found from this employee.'
+        : `Shift are not found from this sent shift id : ${id}. `;
+      await this.log(currentUser, 'CLOSE_SHIFT_FAILED', errMessage);
+      throw new NotFoundException(errMessage);
     }
 
-    if(shiftData.status === 'COMPLETED') {
-        await this.log(currentUser , 'CLOSE_SHIFT_FAILED' , `This shift id : ${shiftData.id} is already completed. can't be open or close anymore.`) ;
-        throw new ConflictException('This shift id is already completed.') ; 
+    if (shiftData.status === 'COMPLETED') {
+      await this.log(
+        currentUser,
+        'CLOSE_SHIFT_FAILED',
+        `This shift id : ${shiftData.id} is already completed. can't be open or close anymore.`,
+      );
+      throw new ConflictException('This shift id is already completed.');
     }
 
-    return await this.dataSource.transaction(async(manager) => {
+    return await this.dataSource.transaction(async (manager) => {
       try {
-        const shiftRepo = manager.getRepository(Shift) ; 
-        const updateResult = await shiftRepo.update({id : shiftData.id} , {status : 'CLOSE' , endTime : new Date()}) ; 
+        const shiftRepo = manager.getRepository(Shift);
+        const updateResult = await shiftRepo.update(
+          { id: shiftData.id },
+          { status: 'CLOSE', endTime: new Date() },
+        );
 
-        if(updateResult.affected == 0) {
-          await this.log(currentUser , 'CLOSE_SHIFT_FAILED' , `Can't Update shift id : ${shiftData.id}.`,manager) ; 
-          throw new NotFoundException(`Can't shift to close.`) ; 
+        if (updateResult.affected == 0) {
+          await this.log(
+            currentUser,
+            'CLOSE_SHIFT_FAILED',
+            `Can't Update shift id : ${shiftData.id}.`,
+            manager,
+          );
+          throw new NotFoundException(`Can't shift to close.`);
         }
-        this.sseService.triggerRefreshShiftId(shiftData.id) ; 
-        await this.log(currentUser , 'CLOSE_SHIFT_SUCCESS' , `Shift id : ${shiftData.id} to update status from ${shiftData.status} to CLOSE.`,manager) ;
-        return {message : 'Close shift success.'} ; 
+        this.sseService.triggerRefreshShiftId(shiftData.id);
+        await this.log(
+          currentUser,
+          'CLOSE_SHIFT_SUCCESS',
+          `Shift id : ${shiftData.id} to update status from ${shiftData.status} to CLOSE.`,
+          manager,
+        );
+        return { message: 'Close shift success.' };
+      } catch (err) {
+        handleError(err, `Shifts.service`);
       }
-      catch(err) {
-        handleError(err,`Shifts.service`) ;
-      }
-    }) ;
+    });
   }
 
-  async updateAuditShift(user : any , id : string , paras : ShiftAuditBody) {
-    const shiftData = await this.getShiftWithCloseStatusOrFail(user , id , 'AUDIT_SHIFT') ;
-    const pendingTransId = await this.transactionService.getPendingTransId(id) ; 
-    
+  async updateAuditShift(user: any, id: string, paras: ShiftAuditBody) {
+    const shiftData = await this.getShiftWithCloseStatusOrFail(
+      user,
+      id,
+      'AUDIT_SHIFT',
+    );
+    const pendingTransId = await this.transactionService.getPendingTransId(id);
 
-    if(pendingTransId && pendingTransId.length != 0) {
-      await this.log(user, 'AUDIT_SHIFT_FAILED' , `Can't audit shift id : ${id} cause this shift still have ${pendingTransId.length} pending exchange transaction.`) ; 
-      throw new ConflictException(`Can't audit this shift id: ${id} cause this shift still have ${pendingTransId.length} pending exchange transaction.`) ;     
+    if (pendingTransId && pendingTransId.length != 0) {
+      await this.log(
+        user,
+        'AUDIT_SHIFT_FAILED',
+        `Can't audit shift id : ${id} cause this shift still have ${pendingTransId.length} pending exchange transaction.`,
+      );
+      throw new ConflictException(
+        `Can't audit this shift id: ${id} cause this shift still have ${pendingTransId.length} pending exchange transaction.`,
+      );
     }
-  
-    await this.dataSource.transaction(async(manager) =>{
-      const transactionData = await this.transactionService.create(manager, {type : 'CLOSE_SHIFT_CASH_COUNT' , shiftId : id}) ;
-            
-      const transactionId = transactionData.id ; 
-      const denominations = paras.cashCountData.denominations ;
-      const amounts = paras.cashCountData.amounts ;
-      const cashCountData = await this.cashCountServicee.create(user , {transactionId : transactionId , denominations : denominations ,amounts :amounts } , manager) ; 
-           
-      const shiftRepo = manager.getRepository(Shift) ; 
-      const updateresult = await shiftRepo.update({id : id , status : 'CLOSE'} ,{status : 'COMPLETED' ,  balance_check : paras.balanceCheck , cash_advance : paras.cashAdvance}) ;
-      if(updateresult.affected == 0) {
-        await this.log(user , 'AUDIT_SHIFT_FAILED' , `Can't audit this shift id: ${id} may casuse by some user just change status to 'OPEN'.`) ; 
-          throw new ConflictException(`Can't audit this shift id: ${id} may casuse by some user just change status to 'OPEN'.`) ;
+
+    await this.dataSource.transaction(async (manager) => {
+      const transactionData = await this.transactionService.create(manager, {
+        type: 'CLOSE_SHIFT_CASH_COUNT',
+        shiftId: id,
+      });
+
+      const transactionId = transactionData.id;
+      const denominations = paras.cashCountData.denominations;
+      const amounts = paras.cashCountData.amounts;
+      const cashCountData = await this.cashCountServicee.create(
+        user,
+        {
+          transactionId: transactionId,
+          denominations: denominations,
+          amounts: amounts,
+        },
+        manager,
+      );
+
+      const shiftRepo = manager.getRepository(Shift);
+      const updateresult = await shiftRepo.update(
+        { id: id, status: 'CLOSE' },
+        {
+          status: 'COMPLETED',
+          balance_check: paras.balanceCheck,
+          cash_advance: paras.cashAdvance,
+        },
+      );
+      if (updateresult.affected == 0) {
+        await this.log(
+          user,
+          'AUDIT_SHIFT_FAILED',
+          `Can't audit this shift id: ${id} may casuse by some user just change status to 'OPEN'.`,
+        );
+        throw new ConflictException(
+          `Can't audit this shift id: ${id} may casuse by some user just change status to 'OPEN'.`,
+        );
       }
 
-      await this.log(user ,'AUDIT_SHIFT_SUCCESS' , `This shift id : ${id} had been audited.`) ; 
-
-      }) ; 
-    this.sseService.triggerRefreshShiftId(id) ;          
-    return {message : 'Audit shift success.'} ; 
+      await this.log(
+        user,
+        'AUDIT_SHIFT_SUCCESS',
+        `This shift id : ${id} had been audited.`,
+      );
+    });
+    this.sseService.triggerRefreshShiftId(id);
+    return { message: 'Audit shift success.' };
   }
 
   async getShiftsByUserIdAndMonth(userId: string, month: number, year: number) {
@@ -485,9 +647,8 @@ export class ShiftsService {
       where: {
         userId: userId,
         startTime: Between(fromDate, toDate),
-        status: "COMPLETED"
+        status: 'COMPLETED',
       },
     });
   }
-  
 }

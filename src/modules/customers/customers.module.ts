@@ -7,10 +7,13 @@ import { SystemLogsModule } from '../system-logs/system-logs.module';
 import { ShiftsModule } from './../../modules/shifts/shifts.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Customer]) , SystemLogsModule , ShiftsModule],
+  imports: [
+    TypeOrmModule.forFeature([Customer]),
+    SystemLogsModule,
+    ShiftsModule,
+  ],
   controllers: [CustomersController],
   providers: [CustomersService],
   exports: [CustomersService],
-  
 })
 export class CustomersModule {}

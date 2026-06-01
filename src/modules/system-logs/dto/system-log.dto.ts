@@ -16,12 +16,11 @@ export class CreateSystemLogDto {
 }
 
 export class QueryDateDto {
-  @IsDate() 
-  @Type(()=>Date)
-  startDate: Date ; 
+  @IsDate()
+  @Type(() => Date)
+  startDate: Date;
 
-  @IsDate() 
-  @Type(()=>Date)
-  endDate: Date ; 
-
+  @IsDate()
+  @Type(() => Date)
+  endDate: Date;
 }

@@ -9,7 +9,7 @@ import { GetShifts } from './dto/report.dto';
 import { ShiftsService } from './../shifts/shifts.service';
 import { StocksService } from './../stocks/stocks.service';
 import { CashCountsService } from './../cash-counts/cash-counts.service';
-import { ExchangeTransactionsService } from './../exchange-transactions/exchange-transactions.service' ;
+import { ExchangeTransactionsService } from './../exchange-transactions/exchange-transactions.service';
 import { TransferTransactionsService } from './../transfer-transactions/transfer-transactions.service';
 import { EmployeePerformance } from './entities/employeePerfor.entity';
 
@@ -19,8 +19,8 @@ export class ReportsService {
     private readonly shiftService: ShiftsService,
     private readonly stockService: StocksService,
     private readonly cashCountService: CashCountsService,
-    private readonly exchangeTransactionService : ExchangeTransactionsService , 
-    private readonly tranferTransactionService : TransferTransactionsService , 
+    private readonly exchangeTransactionService: ExchangeTransactionsService,
+    private readonly tranferTransactionService: TransferTransactionsService,
     @InjectRepository(EmployeePerformance)
     private readonly employeePerformanceRepository: Repository<EmployeePerformance>,
     private readonly dataSource: DataSource,
@@ -51,38 +51,52 @@ export class ReportsService {
     return {};
   }
 
-  async getShiftsReport(user : any , status : string , from : Date , to : Date ) {
-      from.setHours(0,0,0,0) ;
-      to.setHours(23,59,59,9999) ;
+  async getShiftsReport(user: any, status: string, from: Date, to: Date) {
+    from.setHours(0, 0, 0, 0);
+    to.setHours(23, 59, 59, 9999);
 
+    const shiftsData = await this.shiftService.getShiftsByStatus(
+      status,
+      from,
+      to,
+    );
 
-      const shiftsData  = await this.shiftService.getShiftsByStatus(status , from , to); 
+    if (!shiftsData || (shiftsData && shiftsData.length === 0)) return null;
 
-      if (!shiftsData || (shiftsData && shiftsData.length === 0))  
-        return null ; 
-      
-      const reportData  =  await Promise.all(shiftsData.map(async (shift)=>{
-        const cashCountDataPromise = this.cashCountService.getCashCountByShiftId(shift.id) ;
-        const exchangeTransactionDataPromise = this.exchangeTransactionService.getForeingAmountExchangeRateAndStatusFromShiftId(shift.id) ;
-        const tranferTransactionDataPromise =this.tranferTransactionService.getAmountTypeStatusByShiftId(shift.id) ;
-        
+    const reportData = await Promise.all(
+      shiftsData.map(async (shift) => {
+        const cashCountDataPromise =
+          this.cashCountService.getCashCountByShiftId(shift.id);
+        const exchangeTransactionDataPromise =
+          this.exchangeTransactionService.getForeignAmountExchangeRateAndStatusFromShiftId(
+            shift.id,
+          );
+        const tranferTransactionDataPromise =
+          this.tranferTransactionService.getAmountTypeStatusByShiftId(shift.id);
+
         try {
-          const [cashCountData , exchangeTransactionData , tranferTransactionData] = await Promise.all([cashCountDataPromise , exchangeTransactionDataPromise , tranferTransactionDataPromise]) ; 
+          const [
+            cashCountData,
+            exchangeTransactionData,
+            tranferTransactionData,
+          ] = await Promise.all([
+            cashCountDataPromise,
+            exchangeTransactionDataPromise,
+            tranferTransactionDataPromise,
+          ]);
           return {
-            shiftData : shift , 
-            cashCountData : cashCountData , 
-            exchangeTransactionData : exchangeTransactionData , 
-            tranferTransactionData : tranferTransactionData ,
-          }
+            shiftData: shift,
+            cashCountData: cashCountData,
+            exchangeTransactionData: exchangeTransactionData,
+            tranferTransactionData: tranferTransactionData,
+          };
+        } catch (err) {
+          handleError(err);
         }
-        catch(err) {
-          handleError(err) ; 
-        }
-        
-      })) ;  
+      }),
+    );
 
-
-      return reportData ; 
+    return reportData;
   }
 
   //update
@@ -90,21 +104,31 @@ export class ReportsService {
 
   //==================report employee performance ================
 
- private async saveCalculatedPerformance(userId: string, year: number, month: number) {
+  private async saveCalculatedPerformance(
+    userId: string,
+    year: number,
+    month: number,
+  ) {
     const reportMonth = new Date(year, month - 1, 1);
-    
+
     // ดึงกะการทำงานในเดือนนั้นๆ
-    const shifts = await this.shiftService.getShiftsByUserIdAndMonth(userId, month, year);
+    const shifts = await this.shiftService.getShiftsByUserIdAndMonth(
+      userId,
+      month,
+      year,
+    );
 
     const totalBalanceCheck = shifts.reduce(
-      (sum, shift) => Number(sum) + Number(shift.balance_check || 0), 0
+      (sum, shift) => Number(sum) + Number(shift.balance_check || 0),
+      0,
     );
     const totalCashAdvance = shifts.reduce(
-      (sum, shift) => Number(sum) + Number(shift.cash_advance || 0), 0
+      (sum, shift) => Number(sum) + Number(shift.cash_advance || 0),
+      0,
     );
 
     let performance = await this.employeePerformanceRepository.findOne({
-      where: { userId, reportMonth }
+      where: { userId, reportMonth },
     });
 
     if (performance) {
@@ -124,22 +148,36 @@ export class ReportsService {
 
   async updateEmployeePerformance(userId: string) {
     const now = new Date();
-    return this.saveCalculatedPerformance(userId, now.getFullYear(), now.getMonth() + 1);
+    return this.saveCalculatedPerformance(
+      userId,
+      now.getFullYear(),
+      now.getMonth() + 1,
+    );
   }
 
   async updateEmployeePerformanceForMonth(userId: string, date: Date) {
     const d = new Date(date);
-    return this.saveCalculatedPerformance(userId, d.getFullYear(), d.getMonth() + 1);
+    return this.saveCalculatedPerformance(
+      userId,
+      d.getFullYear(),
+      d.getMonth() + 1,
+    );
   }
 
-  async getEmployeePerformanceByUserIdAndMonth(userId: string, date: Date, withShifts: boolean) {
+  async getEmployeePerformanceByUserIdAndMonth(
+    userId: string,
+    date: Date,
+    withShifts: boolean,
+  ) {
     const d = new Date(date);
     const year = d.getFullYear();
     const month = d.getMonth() + 1;
     const reportMonth = new Date(year, month - 1, 1);
 
-    const relations = withShifts ? ['user', 'user.shifts', 'user.shifts.booth'] : ['user'];
-    
+    const relations = withShifts
+      ? ['user', 'user.shifts', 'user.shifts.booth']
+      : ['user'];
+
     return await this.employeePerformanceRepository.findOne({
       relations,
       where: {
@@ -148,10 +186,13 @@ export class ReportsService {
         ...(withShifts && {
           user: {
             shifts: {
-              startTime: Between(new Date(year, month - 1, 1), new Date(year, month, 0))
-            }
-          }
-        })
+              startTime: Between(
+                new Date(year, month - 1, 1),
+                new Date(year, month, 0),
+              ),
+            },
+          },
+        }),
       },
       select: {
         id: true,
@@ -169,31 +210,44 @@ export class ReportsService {
               endTime: true,
               balance_check: true,
               cash_advance: true,
-              booth: { id: true, name: true }
-            }
-          })
-        }
-      }
+              booth: { id: true, name: true },
+            },
+          }),
+        },
+      },
     });
   }
 
-  async getAllEmployeePerformance(startDate?: Date, endDate?: Date,withShifts = false) {
-    const where = startDate && endDate ? {
-      reportMonth: Between(
-        new Date(startDate.getFullYear(), startDate.getMonth(), 1),
-        new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0)
-      )
-    } : {};
+  async getAllEmployeePerformance(
+    startDate?: Date,
+    endDate?: Date,
+    withShifts = false,
+  ) {
+    const where =
+      startDate && endDate
+        ? {
+            reportMonth: Between(
+              new Date(startDate.getFullYear(), startDate.getMonth(), 1),
+              new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0),
+            ),
+          }
+        : {};
 
     return await this.employeePerformanceRepository.find({
-      relations: ['user', ...(withShifts ? ['user.shifts', 'user.shifts.booth'] : [])],
+      relations: [
+        'user',
+        ...(withShifts ? ['user.shifts', 'user.shifts.booth'] : []),
+      ],
       where,
       select: {
         id: true,
         totalBalanceCheck: true,
         totalCashAdvance: true,
         reportMonth: true,
-        user: { id: true, username: true, email: true ,
+        user: {
+          id: true,
+          username: true,
+          email: true,
           ...(withShifts && {
             shifts: {
               id: true,
@@ -201,11 +255,11 @@ export class ReportsService {
               endTime: true,
               balance_check: true,
               cash_advance: true,
-              booth: { id: true, name: true }
-            }
-          })
-        }
-      }
+              booth: { id: true, name: true },
+            },
+          }),
+        },
+      },
     });
   }
 
@@ -213,27 +267,28 @@ export class ReportsService {
     const performance = await this.employeePerformanceRepository.findOne({
       relations: ['user', 'user.shifts', 'user.shifts.booth'],
       where: { id },
-        select: {
+      select: {
+        id: true,
+        totalBalanceCheck: true,
+        totalCashAdvance: true,
+        reportMonth: true,
+        user: {
+          id: true,
+          username: true,
+          email: true,
+          shifts: {
             id: true,
-            totalBalanceCheck: true,
-            totalCashAdvance: true,
-            reportMonth: true,
-            user: {
-                id: true,
-                username: true,
-                email: true,
-                shifts: {
-                    id: true,
-                    startTime: true,
-                    endTime: true,
-                    balance_check: true,
-                    cash_advance: true,
-                    booth: { id: true, name: true }
-                }
-            }
-        }
+            startTime: true,
+            endTime: true,
+            balance_check: true,
+            cash_advance: true,
+            booth: { id: true, name: true },
+          },
+        },
+      },
     });
-    if (!performance) throw new NotFoundException('Performance record not found');
+    if (!performance)
+      throw new NotFoundException('Performance record not found');
     return performance;
   }
 }

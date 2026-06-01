@@ -36,61 +36,61 @@ export class CurrenciesService implements OnModuleInit {
   private readonly fallbackCurrencies = [
     {
       code: 'THB',
-      name: 'ไทย : บาท (THB)',
+      name: 'Thailand : Baht (THB)',
       buyRate: 1,
       sellRate: 1,
     },
     {
       code: 'USD',
-      name: 'สหรัฐอเมริกา : ดอลลาร์ (USD)',
+      name: 'United States : Dollar (USD)',
       buyRate: 32.4313,
       sellRate: 32.7511,
     },
     {
       code: 'GBP',
-      name: 'อังกฤษ : ปอนด์สเตอร์ลิง (GBP)',
+      name: 'United Kingdom : Pound Sterling (GBP)',
       buyRate: 43.3639,
       sellRate: 44.1317,
     },
     {
       code: 'EUR',
-      name: 'ยูโรโซน : ยูโร (EUR)',
+      name: 'Eurozone : Euro (EUR)',
       buyRate: 37.4028,
       sellRate: 38.025,
     },
     {
       code: 'JPY',
-      name: 'ญี่ปุ่น : เยน (JPY)',
+      name: 'Japan : Yen (JPY)',
       buyRate: 0.2032,
       sellRate: 0.209,
     }, // Normalize แล้ว (ต่อ 1 เยน)
     {
       code: 'SGD',
-      name: 'สิงคโปร์ : ดอลลาร์ (SGD)',
+      name: 'Singapore : Dollar (SGD)',
       buyRate: 25.2148,
       sellRate: 25.7528,
     },
     {
       code: 'CNY',
-      name: 'จีน : หยวน เรนมินบิ (CNY)',
+      name: 'China : Yuan Renminbi (CNY)',
       buyRate: 4.6879,
       sellRate: 4.7755,
     },
     {
       code: 'HKD',
-      name: 'ฮ่องกง : ดอลลาร์ (HKD)',
+      name: 'Hong Kong : Dollar (HKD)',
       buyRate: 4.1304,
       sellRate: 4.1937,
     },
     {
       code: 'AUD',
-      name: 'ออสเตรเลีย : ดอลลาร์ (AUD)',
+      name: 'Australia : Dollar (AUD)',
       buyRate: 22.7211,
       sellRate: 23.4431,
     },
     {
       code: 'MYR',
-      name: 'มาเลเซีย : ริงกิต (MYR)',
+      name: 'Malaysia : Ringgit (MYR)',
       buyRate: 8.1808,
       sellRate: 8.4041,
     },
@@ -163,7 +163,7 @@ export class CurrenciesService implements OnModuleInit {
           await repo.save(currency);
           await this.exchangeRatesService.createDefaultSubRate(
             manager,
-            currency as Currency,
+            currency,
           ); // สร้างเรทลูกเริ่มต้นให้ด้วย
         }
         this.logger.log('Fallback data seeded successfully.');
@@ -176,7 +176,7 @@ export class CurrenciesService implements OnModuleInit {
   // +++++++++++++++++++++++++++ 2. Auto Update All (BOT API) ++++++++++++++++++++++++++++
   async updateAutoRateAll(): Promise<boolean> {
     try {
-      let SynUpdataData: { code: string; buy: number; sell: number }[] = [];
+      const SynUpdataData: { code: string; buy: number; sell: number }[] = [];
       const today = new Date().toISOString().split('T')[0];
       const dateRes = await firstValueFrom(
         this.httpService.get(this.baseUrl, {
@@ -201,7 +201,7 @@ export class CurrenciesService implements OnModuleInit {
         if (!detailRates) throw new Error('Invalid BOT response');
         detailRates.push({
           currency_id: 'THB',
-          currency_name_th: 'ไทย : บาท (THB)',
+          currency_name_th: 'Thailand : Baht (THB)',
           buying_transfer: '1',
           selling: '1',
         });
@@ -252,7 +252,7 @@ export class CurrenciesService implements OnModuleInit {
             await repo.save(newCurrency);
             await this.exchangeRatesService.createDefaultSubRate(
               manager,
-              newCurrency as Currency,
+              newCurrency,
             ); // สร้างเรทลูกเริ่มต้นให้ด้วย
           }
         }
@@ -412,42 +412,52 @@ export class CurrenciesService implements OnModuleInit {
   }
 
   async setUpdateModeBulk(user: any, updateData: CurrencyUpdateModeDto[]) {
-  try {
-    if (!updateData || !Array.isArray(updateData) || updateData.length === 0) {
-      throw new BadRequestException('Invalid input data. Expecting an array.');
-    }
-
-    const results = await this.dataSource.transaction(async (manager) => {
-      console.log('Received bulk mode update request:', updateData);
-      
-      const results = [];
-
-      // ✅ ใช้ for...of เพื่อให้ทำงานเรียงลำดับ ป้องกัน Database Deadlock
-      for (const item of updateData) {
-        try {
-          // ✅ โยน manager เข้าไปให้ setUpdateMode ใช้งาน
-          const report = await this.setUpdateMode(user, item.id, item.mode as UpdateMode, manager);
-          results.push({ ...report, statusUpdate: true });
-        } catch (err: any) {
-          console.error(`Failed to update ${item.id}:`, err);
-          results.push({
-            id: item.id,
-            error: err.message || 'Unknown error',
-            statusUpdate: false,
-          });
-        }
+    try {
+      if (
+        !updateData ||
+        !Array.isArray(updateData) ||
+        updateData.length === 0
+      ) {
+        throw new BadRequestException(
+          'Invalid input data. Expecting an array.',
+        );
       }
 
-      // หลังจากอัปเดตโหมดทั้งหมดแล้ว ค่อยอัปเดตเรทลูกทีเดียวเพื่อลดโอกาสเกิด Deadlock
-      this.sseService.triggerRefreshSignal(); // แจ้งให้หน้าเว็บรีเฟรชข้อมูล
-      
-    });
-    await this.updateAutoRateAll();
-    return results;
-  } catch (err: any) {
-    handleError(err, 'Failed to set update mode for all currencies');
+      const results = await this.dataSource.transaction(async (manager) => {
+        console.log('Received bulk mode update request:', updateData);
+
+        const results = [];
+
+        // ✅ ใช้ for...of เพื่อให้ทำงานเรียงลำดับ ป้องกัน Database Deadlock
+        for (const item of updateData) {
+          try {
+            // ✅ โยน manager เข้าไปให้ setUpdateMode ใช้งาน
+            const report = await this.setUpdateMode(
+              user,
+              item.id,
+              item.mode,
+              manager,
+            );
+            results.push({ ...report, statusUpdate: true });
+          } catch (err: any) {
+            console.error(`Failed to update ${item.id}:`, err);
+            results.push({
+              id: item.id,
+              error: err.message || 'Unknown error',
+              statusUpdate: false,
+            });
+          }
+        }
+
+        // หลังจากอัปเดตโหมดทั้งหมดแล้ว ค่อยอัปเดตเรทลูกทีเดียวเพื่อลดโอกาสเกิด Deadlock
+        this.sseService.triggerRefreshSignal(); // แจ้งให้หน้าเว็บรีเฟรชข้อมูล
+      });
+      await this.updateAutoRateAll();
+      return results;
+    } catch (err: any) {
+      handleError(err, 'Failed to set update mode for all currencies');
+    }
   }
-}
 
   async getTHBCurrency() {
     try {

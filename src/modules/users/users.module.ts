@@ -8,7 +8,12 @@ import { SystemLogsModule } from '../system-logs/system-logs.module';
 import { SseModule } from '../sse/sse.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), RedisModule,SystemLogsModule, SseModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    RedisModule,
+    SystemLogsModule,
+    SseModule,
+  ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],

@@ -8,10 +8,14 @@ import { ExclusiveExchangeRatesModule } from '../exclusive-exchange-rates/exclus
 import { SseModule } from '../sse/sse.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ExchangeRate]), SystemLogsModule, forwardRef(() => ExclusiveExchangeRatesModule), SseModule ],
+  imports: [
+    TypeOrmModule.forFeature([ExchangeRate]),
+    SystemLogsModule,
+    forwardRef(() => ExclusiveExchangeRatesModule),
+    SseModule,
+  ],
   controllers: [ExchangeRatesController],
   providers: [ExchangeRatesService],
   exports: [ExchangeRatesService],
-  
 })
 export class ExchangeRatesModule {}

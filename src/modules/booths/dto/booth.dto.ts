@@ -9,7 +9,6 @@ export class CreateBoothDto implements Pick<BoothData, 'name' | 'location'> {
   @IsString()
   @IsOptional()
   location: string;
-
 }
 
 export class UpdateBoothDto implements Partial<BoothData> {
@@ -26,8 +25,10 @@ export class UpdateBoothDto implements Partial<BoothData> {
   isActive?: boolean;
 }
 
-export class BoothDto implements Omit<BoothData, 'createdAt' | 'updatedAt' | 'deletedAt' | 'location'> {
-
+export class BoothDto implements Omit<
+  BoothData,
+  'createdAt' | 'updatedAt' | 'deletedAt' | 'location'
+> {
   @IsString()
   @IsNotEmpty()
   id: string;
@@ -60,5 +61,3 @@ export class BoothDto implements Omit<BoothData, 'createdAt' | 'updatedAt' | 'de
   @IsNotEmpty()
   updatedAt: Date;
 }
-
-

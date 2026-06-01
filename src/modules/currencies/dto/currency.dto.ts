@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsBoolean, Length } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
+  Length,
+} from 'class-validator';
 
 export class CreateCurrencyDto {
   @IsString()
@@ -34,14 +40,13 @@ export class UpdateCurrencyDto {
   @IsString()
   @IsOptional()
   symbol: string; // เช่น $
-  
+
   @IsOptional()
   buyRate: number;
-  
+
   @IsOptional()
   sellRate: number;
-
-} 
+}
 
 export enum UpdateMode {
   AUTO = 'AUTO',

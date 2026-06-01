@@ -134,19 +134,26 @@ export class UsersService {
 
         if (currentUser.id === id && updateUserDto.role) {
           if (updateUserDto.role !== existingUser.role) {
-          await this.log(
-            currentUser,
-            'UPDATE_USER_FAILED',
-            `Cannot change own role: ${id}`,
-            manager,
-          );
-          throw new ForbiddenException('Cannot change own role');
-        }
+            await this.log(
+              currentUser,
+              'UPDATE_USER_FAILED',
+              `Cannot change own role: ${id}`,
+              manager,
+            );
+            throw new ForbiddenException('Cannot change own role');
+          }
         }
         // 2. ตรวจสอบสิทธิ์ (Business Logic)
         if (existingUser.role === 'ADMIN') {
-          const countAdmins = await userRepo.count({ where: { role: 'ADMIN' } });
-          if (existingUser.id === currentUser.id && updateUserDto.role && updateUserDto.role !== 'ADMIN' && countAdmins <= 1) {
+          const countAdmins = await userRepo.count({
+            where: { role: 'ADMIN' },
+          });
+          if (
+            existingUser.id === currentUser.id &&
+            updateUserDto.role &&
+            updateUserDto.role !== 'ADMIN' &&
+            countAdmins <= 1
+          ) {
             await this.log(
               currentUser,
               'UPDATE_USER_FAILED',
@@ -508,7 +515,7 @@ export class UsersService {
 
   // +++++++++++++++++++++++++++ ฟังก์ชันค้นหา (ไม่ต้อง Transaction) ++++++++++++++++++++++++++++
   async findAll() {
-    const users =await this.userRepository.find({
+    const users = await this.userRepository.find({
       select: [
         'id',
         'email',
@@ -519,7 +526,7 @@ export class UsersService {
         'createdAt',
       ],
     });
-    return  users;
+    return users;
   }
 
   async findOne(id: string) {

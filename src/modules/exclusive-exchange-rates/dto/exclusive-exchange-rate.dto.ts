@@ -17,7 +17,7 @@ export class CreateExclusiveExchangeRateDto {
 }
 export class ConfirmReviewDto {
   ids: string[]; // รับเป็น Array ของ string ไปเลย ง่ายกว่า
- }
+}
 
 export class UpdateExclusiveExchangeRateDto implements Partial<ExclusiveExchangeRate> {
   @IsString()

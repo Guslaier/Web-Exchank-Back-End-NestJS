@@ -13,7 +13,6 @@ import configuration from '../../config/configuration';
 import { RedisModule } from '../redis/redis.module';
 import { SystemLogsModule } from '../system-logs/system-logs.module';
 
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
@@ -28,7 +27,7 @@ import { SystemLogsModule } from '../system-logs/system-logs.module';
       }),
     }),
     RedisModule,
-    SystemLogsModule, 
+    SystemLogsModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],

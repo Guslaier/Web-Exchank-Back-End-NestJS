@@ -9,7 +9,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, CreateUserResponseDto, UpdateUserDto } from './dto/user.dto';
+import {
+  CreateUserDto,
+  CreateUserResponseDto,
+  UpdateUserDto,
+} from './dto/user.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
@@ -42,7 +46,11 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER', 'ADMIN')
   @Put('update/:id')
-  update(@CurrentUser() currentUser: any,@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @CurrentUser() currentUser: any,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
     return this.usersService.update(currentUser, id, updateUserDto);
   }
 
@@ -55,21 +63,38 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Put('change-password/:id')
-  changePassword(@CurrentUser() currentUser: any,@Param('id') id: string, @Body() body: { newPass: string, oldPass: string }) {
-    return this.usersService.changePassword(currentUser, body.newPass, body.oldPass);
+  changePassword(
+    @CurrentUser() currentUser: any,
+    @Param('id') id: string,
+    @Body() body: { newPass: string; oldPass: string },
+  ) {
+    return this.usersService.changePassword(
+      currentUser,
+      body.newPass,
+      body.oldPass,
+    );
   }
-
 
   @UseGuards(JwtAuthGuard)
   @Roles('MANAGER', 'ADMIN')
   @Post('request-reset-password')
-  requestResetPassword(@CurrentUser() currentUser: any, @Body('email') email: string,@Body('id') id: string) {
+  requestResetPassword(
+    @CurrentUser() currentUser: any,
+    @Body('email') email: string,
+    @Body('id') id: string,
+  ) {
     return this.usersService.requestResetPassword(currentUser, email, id); // ใช้ email เป็น id ชั่วคราวสำหรับการส่ง token reset password
   }
 
   @Put('reset-password')
-  resetPassword(@Body() body: {email: string, token: string, newPassword: string }) {
-    return this.usersService.resetPassword(body.email, body.token, body.newPassword);
+  resetPassword(
+    @Body() body: { email: string; token: string; newPassword: string },
+  ) {
+    return this.usersService.resetPassword(
+      body.email,
+      body.token,
+      body.newPassword,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

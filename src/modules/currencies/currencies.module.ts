@@ -9,7 +9,6 @@ import { CurrenciesController } from './currencies.controller';
 import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 import { SseModule } from '../sse/sse.module';
 
-
 @Module({
   imports: [
     TypeOrmModule.forFeature([Currency]),

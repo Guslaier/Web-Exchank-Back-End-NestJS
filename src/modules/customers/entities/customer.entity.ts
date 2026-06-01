@@ -1,7 +1,16 @@
 import { TimestampTransformer } from '../../../common/helper/timestamp';
 import { ExchangeTransaction } from './../../../modules/exchange-transactions/entities/exchange-transaction.entity';
-import { Transaction} from './../../transactions/entities/transaction.entity' ;
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import { Transaction } from './../../transactions/entities/transaction.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 
 @Entity('customers')
 export class Customer {
@@ -11,14 +20,14 @@ export class Customer {
   @Column()
   transactionId: string;
 
-  @OneToOne(() =>  Transaction , Transaction => Transaction.id)
+  @OneToOne(() => Transaction, (Transaction) => Transaction.id)
   @JoinColumn({ name: 'transactionId' })
   transaction: Transaction;
 
   @Column()
   passportImg: string;
 
-  @Column() 
+  @Column()
   passportNo: string;
 
   @Column()
@@ -36,6 +45,10 @@ export class Customer {
   @Column()
   roomNumber: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" , transformer: TimestampTransformer })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   createdAt: Date;
 }

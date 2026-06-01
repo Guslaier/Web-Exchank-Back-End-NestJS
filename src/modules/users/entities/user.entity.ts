@@ -1,15 +1,21 @@
 import { TimestampTransformer } from '../../../common/helper/timestamp';
 import { UserRole } from 'index';
 import { Shift } from '../../shifts/entities/shift.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
-
-
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
+} from 'typeorm';
 
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  
+
   @Column()
   username: string;
 
@@ -22,16 +28,28 @@ export class User {
   @Column()
   passwordHash: string;
 
-  @Column({ type: 'enum', enum: ['ADMIN', 'MANAGER', 'EMPLOYEE'] , default: 'EMPLOYEE' })
+  @Column({
+    type: 'enum',
+    enum: ['ADMIN', 'MANAGER', 'EMPLOYEE'],
+    default: 'EMPLOYEE',
+  })
   role: UserRole;
-  
+
   @Column({ default: true })
   isActive: boolean;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", transformer: TimestampTransformer })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", transformer: TimestampTransformer })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   updatedAt: Date;
 
   @DeleteDateColumn()

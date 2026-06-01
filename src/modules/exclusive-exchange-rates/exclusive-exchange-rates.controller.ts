@@ -1,24 +1,42 @@
-import { Controller, Get, Post, Body, Param, Patch, BadRequestException, Header, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  BadRequestException,
+  Header,
+  UseGuards,
+} from '@nestjs/common';
 import { ExclusiveExchangeRatesService } from './exclusive-exchange-rates.service';
-import { CreateExclusiveExchangeRateDto, UpdateExclusiveExchangeRateDto } from './dto/exclusive-exchange-rate.dto';
+import {
+  CreateExclusiveExchangeRateDto,
+  UpdateExclusiveExchangeRateDto,
+} from './dto/exclusive-exchange-rate.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { re } from 'mathjs';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
-import {ConfirmReviewDto} from './dto/exclusive-exchange-rate.dto';
+import { ConfirmReviewDto } from './dto/exclusive-exchange-rate.dto';
 
- 
 @Controller('exclusive-exchange-rates')
 export class ExclusiveExchangeRatesController {
-  constructor(private readonly exclusiveExchangeRatesService: ExclusiveExchangeRatesService) {}
+  constructor(
+    private readonly exclusiveExchangeRatesService: ExclusiveExchangeRatesService,
+  ) {}
 
   @Patch(':id')
   async updateExclusiveRate(
     @Param('id') id: number,
     @Body() updateDto: Partial<CreateExclusiveExchangeRateDto>,
   ) {
-    return await this.exclusiveExchangeRatesService.update(null, id.toString(), updateDto as any);
+    return await this.exclusiveExchangeRatesService.update(
+      null,
+      id.toString(),
+      updateDto as any,
+    );
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -40,15 +58,18 @@ export class ExclusiveExchangeRatesController {
   @Get('exchange-rate/:exchangeRateId')
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate')
   async getByExchangeRate(@Param('exchangeRateId') exchangeRateId: string) {
-    return await this.exclusiveExchangeRatesService.findByExchangeRate(exchangeRateId);
+    return await this.exclusiveExchangeRatesService.findByExchangeRate(
+      exchangeRateId,
+    );
   }
 
   @Get('currency/:currencyCode')
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate')
   async getByCurrency(@Param('currencyCode') currencyCode: string) {
-    return await this.exclusiveExchangeRatesService.findByCurrency(currencyCode);
+    return await this.exclusiveExchangeRatesService.findByCurrency(
+      currencyCode,
+    );
   }
-
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('MANAGER', 'ADMIN')
@@ -71,17 +92,26 @@ export class ExclusiveExchangeRatesController {
   @Post('confirm-review')
   async confirmReview(@CurrentUser() user: any, @Body() dto: ConfirmReviewDto) {
     if (!dto.ids || !Array.isArray(dto.ids)) {
-    throw new BadRequestException('รูปแบบข้อมูลไม่ถูกต้อง ต้องส่ง ids เป็น Array');
-  }
+      throw new BadRequestException(
+        'Invalid data format. "ids" must be sent as an array.',
+      );
+    }
 
     return await this.exclusiveExchangeRatesService.bulk_review(user, dto.ids);
   }
 
   @Post('sync-and-clamp')
-  async syncAndClamp(@Body("excid") excid:string,@Body("masterBuy") masterBuy:number,@Body("masterSell") masterSell:number) {
-    return await this.exclusiveExchangeRatesService.syncAndClampRate(excid, masterBuy, masterSell);
+  async syncAndClamp(
+    @Body('excid') excid: string,
+    @Body('masterBuy') masterBuy: number,
+    @Body('masterSell') masterSell: number,
+  ) {
+    return await this.exclusiveExchangeRatesService.syncAndClampRate(
+      excid,
+      masterBuy,
+      masterSell,
+    );
   }
-  
 
   @Get(':id')
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate')

@@ -99,7 +99,7 @@ export class ExchangeRatesService {
 
       if (throwOnError)
         throw new BadRequestException(
-          `สูตรผิดพลาดหรือค่าเกินกำหนด: ${err.message}`,
+          `Formula error or value exceeds limit: ${err.message}`,
         );
       return baseValue;
     }
@@ -506,7 +506,7 @@ ${JSON.stringify(r.updated)}`,
       return this.dataSource.transaction(async (manager) => {
         const repo = manager.getRepository(ExchangeRate);
         const target = await repo.findOne({ where: { id } });
-        if (!target) throw new NotFoundException('ไม่พบรายการ');
+        if (!target) throw new NotFoundException('Item not found');
         const count = await repo.count({
           where: { currencyId: target.currencyId },
         });
@@ -569,7 +569,7 @@ ${JSON.stringify(r.updated)}`,
     return rates;
   }
 
-  async findByTHBCurency(manager?: EntityManager) {
+  async findByTHBCurrency(manager?: EntityManager) {
     if (manager) {
       const exchangeRates = await manager.findOne(ExchangeRate, {
         where: { currency: { code: 'THB' } },

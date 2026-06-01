@@ -377,17 +377,17 @@ export class ExclusiveExchangeRatesService {
             }
           }),
         );
-        
+
         await this.log(
           user,
           'BULK_UPDATE_SUCCESS',
           // 🚀 แก้ไขตรงบรรทัดนี้: เปลี่ยน result เป็น resultd ให้หมด
           `Bulk update completed with ${resultd.filter((r) => r.status === 'success').length} successes and ${resultd.filter((r) => r.status === 'error').length} errors.`,
         );
-        
+
         return resultd;
       });
-      
+
       this.sseService.triggerRefreshSignal();
       return result;
     } catch (err: any) {
@@ -660,7 +660,7 @@ export class ExclusiveExchangeRatesService {
   // // ค้นหาเรทลูกทั้งหมดที่ผูกกับเรทแม่ตัวนี้
   async findByExchangeRate(exchangeRateId: string) {
     const master = await this.exchangeRateRepo.findOne({
-      where: { id : exchangeRateId },
+      where: { id: exchangeRateId },
     });
     if (!master) {
       await this.log(
@@ -675,7 +675,6 @@ export class ExclusiveExchangeRatesService {
       where: { exchange_rate_id: exchangeRateId },
       relations: ['booth'],
     });
-
 
     return rates.map((rate) => ({
       id: rate.id,

@@ -23,7 +23,7 @@ import {
 } from '../../../types';
 import { IsString } from 'class-validator';
 import { Shift } from '../../shifts/entities/shift.entity';
-import {CashCount} from '../../cash-counts/entities/cash-count.entity'
+import { CashCount } from '../../cash-counts/entities/cash-count.entity';
 import { ExchangeRate } from '../../exchange-rates/entities/exchange-rate.entity';
 import { TimestampTransformer } from '../../../common/helper/timestamp';
 
@@ -32,7 +32,7 @@ export class TransferTransaction implements Omit<
   TransferTransactionData,
   'id' | 'boothId' | 'userId' | 'currencyCode' | 'refBoothId' | 'shiftId'
 > {
- @PrimaryColumn() // ใช้ ID จาก Transaction แม่
+  @PrimaryColumn() // ใช้ ID จาก Transaction แม่
   id: string;
 
   @OneToOne(() => Transaction)
@@ -101,12 +101,20 @@ export class TransferTransaction implements Omit<
   @Column({ nullable: true })
   description: string;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", transformer: TimestampTransformer })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", transformer: TimestampTransformer })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   updatedAt: Date;
 
-  @DeleteDateColumn({transformer: TimestampTransformer})
+  @DeleteDateColumn({ transformer: TimestampTransformer })
   deletedAt?: Date;
 }

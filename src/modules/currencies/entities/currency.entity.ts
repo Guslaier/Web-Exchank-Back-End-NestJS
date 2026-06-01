@@ -1,8 +1,17 @@
 // currencies/entities/currency.entity.ts
 import { Delete } from '@nestjs/common';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { UpdateMode } from '../dto/currency.dto';
-import { CurrencyIF } from  'index'
+import { CurrencyIF } from 'index';
 import { ExchangeRate } from '../../exchange-rates/entities/exchange-rate.entity';
 import { TimestampTransformer } from '../../../common/helper/timestamp';
 
@@ -28,7 +37,7 @@ export class Currency implements CurrencyIF {
 
   @Column({ default: true })
   isActive: boolean;
-  
+
   @Column({ type: 'enum', enum: ['AUTO', 'MANUAL'], default: 'AUTO' })
   updateMode: 'AUTO' | 'MANUAL';
 
@@ -38,16 +47,27 @@ export class Currency implements CurrencyIF {
   @Column({ nullable: true })
   lastBotUpdate: Date; // เก็บเวลาที่ได้รับข้อมูลจาก BOT ล่าสุด
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" , transformer: TimestampTransformer })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", transformer: TimestampTransformer })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   updatedAt: Date;
 
-  @DeleteDateColumn({transformer: TimestampTransformer})
+  @DeleteDateColumn({ transformer: TimestampTransformer })
   deletedAt: Date;
 
-  @OneToMany(() => ExchangeRate, (exchangeRate: ExchangeRate) => exchangeRate.currency)
+  @OneToMany(
+    () => ExchangeRate,
+    (exchangeRate: ExchangeRate) => exchangeRate.currency,
+  )
   @JoinColumn({ name: 'currency_id' })
   exchangeRates: ExchangeRate[];
 }

@@ -30,7 +30,7 @@ export class SharedTransactionsService {
     return transferTransactionData;
   }
 
-  async getForeingAmountExchangeRateAndStatusFromShiftId(id: string) {
+  async getForeignAmountExchangeRateAndStatusFromShiftId(id: string) {
     const exchangeTransactionData = await this.exchangeTransactionRepo.find({
       relations: {
         transaction: {

@@ -55,23 +55,39 @@ export class ExchangeRate {
   })
   buy_rate: number;
 
-  @Column('decimal', { precision: 17, scale: 6, default: 0 ,transformer: {
+  @Column('decimal', {
+    precision: 17,
+    scale: 6,
+    default: 0,
+    transformer: {
       // Transformer ช่วยแปลง String จาก Postgres (Decimal) กลับเป็น Number ใน NestJS
       to: (value: number) => value,
       from: (value: string) => parseFloat(value),
-    },})
+    },
+  })
   sell_rate: number;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP", transformer: TimestampTransformer })
+  @CreateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   createdAt: Date;
 
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" , transformer: TimestampTransformer })
+  @UpdateDateColumn({
+    type: 'timestamp',
+    default: () => 'CURRENT_TIMESTAMP',
+    transformer: TimestampTransformer,
+  })
   updatedAt: Date;
 
-  @DeleteDateColumn({transformer: TimestampTransformer})
+  @DeleteDateColumn({ transformer: TimestampTransformer })
   deletedAt: Date | null;
 
-  @OneToMany(() => ExclusiveExchangeRate, (exclusiveRate:ExclusiveExchangeRate) => exclusiveRate.exchangeRate)
+  @OneToMany(
+    () => ExclusiveExchangeRate,
+    (exclusiveRate: ExclusiveExchangeRate) => exclusiveRate.exchangeRate,
+  )
   @JoinColumn({ name: 'exchange_rate_id' })
   exclusiveRates: ExclusiveExchangeRate[];
 }

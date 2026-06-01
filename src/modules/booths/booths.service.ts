@@ -122,9 +122,9 @@ export class BoothsService {
     return booth;
   }
 
-  async findBoothCurrentShift(id : string , from : Date , to : Date) {
+  async findBoothCurrentShift(id: string, from: Date, to: Date) {
     from.setHours(0, 0, 0, 0);
-    to.setHours(23,59,59,999) ; 
+    to.setHours(23, 59, 59, 999);
 
     const boothData = await this.boothRepository.query(
       `select b.id as boothId , s.id as shiftId , u.id as userId , b.name  , u.username , b.location , s.status , s.cash_advance , s.balance_check from 
@@ -133,16 +133,16 @@ export class BoothsService {
        left join users u on b."currentShiftId" = u.id
        where b.id = $3 and (b."deletedAt" is null) and (b."isActive" = true)
        order by s."startTime" desc
-       limit 1 ` , 
-      [from , to , id]  
-    ) ; 
+       limit 1 `,
+      [from, to, id],
+    );
 
-    return boothData[0] ; 
+    return boothData[0];
   }
 
-  async getBoothIfExist(id : string) {
-    const boothData = await this.findOne(id) ;
-    return boothData ; 
+  async getBoothIfExist(id: string) {
+    const boothData = await this.findOne(id);
+    return boothData;
   }
 
   // อัปเดตข้อมูลบูธ
@@ -294,7 +294,7 @@ export class BoothsService {
           `Reactivated booth: ${id}`,
           manager,
         );
-        this.sseService.triggerRefreshSignal(); 
+        this.sseService.triggerRefreshSignal();
         return { message: 'Booth reactivated successfully' };
       });
     } catch (error) {

@@ -17,7 +17,7 @@ import { ExchangeRatesModule } from './modules/exchange-rates/exchange-rates.mod
 import { ExclusiveExchangeRatesModule } from './modules/exclusive-exchange-rates/exclusive-exchange-rates.module';
 import { SystemLogsModule } from './modules/system-logs/system-logs.module';
 import { RedisModule } from './modules/redis/redis.module';
-import { ReportsModule } from './modules/reports/reports.module' ; 
+import { ReportsModule } from './modules/reports/reports.module';
 import { SseModule } from './modules/sse/sse.module';
 import { StocksModule } from './modules/stocks/stocks.module';
 import { SharedTransactionsModule } from './modules/shared-transactions/shared-transactions.module';
@@ -42,7 +42,6 @@ pg.types.setTypeParser(1114, (value) => value);
         entities: [__dirname + '/modules/**/entities/*.entity{.ts,.js}'],
         extra: {
           options: '-c timezone=Asia/Bangkok',
-        
         },
         autoLoadEntities: true,
         synchronize: true, // ควรเป็น false บน Production
@@ -66,7 +65,7 @@ pg.types.setTypeParser(1114, (value) => value);
     RedisModule,
     SseModule,
     StocksModule,
-    ReportsModule ,
+    ReportsModule,
     SharedTransactionsModule,
   ],
 })

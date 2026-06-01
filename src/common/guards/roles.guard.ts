@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
@@ -9,10 +14,10 @@ export class RolesGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     // 1. อ่าน Role ที่ต้องการจาก Decorator @Roles() ของ Endpoint นั้นๆ
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     // ถ้า Endpoint นั้นไม่ได้แปะ @Roles() แปลว่าไม่ได้ล็อค Role (ใครผ่าน JWT มาก็เข้าได้)
     if (!requiredRoles) {
@@ -28,7 +33,9 @@ export class RolesGuard implements CanActivate {
 
     if (!hasRole) {
       // ถ้า Role ไม่ตรง ให้โยน 403 Forbidden (คุณไม่มีสิทธิ์)
-      throw new ForbiddenException(`คุณไม่มีสิทธิ์เข้าถึง Endpoint นี้`);
+      throw new ForbiddenException(
+        'You do not have permission to access this endpoint',
+      );
     }
 
     return true;

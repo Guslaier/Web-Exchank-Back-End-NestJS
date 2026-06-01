@@ -20,7 +20,14 @@ import { ExchangeRatesModule } from '../exchange-rates/exchange-rates.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TransferTransaction, Booth, Currency, User, Shift, Transaction]),
+    TypeOrmModule.forFeature([
+      TransferTransaction,
+      Booth,
+      Currency,
+      User,
+      Shift,
+      Transaction,
+    ]),
     BoothsModule,
     CurrenciesModule,
     CashCountsModule,
